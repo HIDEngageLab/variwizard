@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+bin
+build
+src/wizard_revision.h
+src/build_number.h
+.vscode

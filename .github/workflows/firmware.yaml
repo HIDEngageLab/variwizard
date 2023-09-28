@@ -1,0 +1,60 @@
+name: VariWizard
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  #schedule:
+  #  - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      BuildType:
+        description: 'Build type'
+        required: true
+        default: Debug
+        type: choice
+        options:
+        - Debug
+        - Release
+
+env:
+  BUILD_TYPE: ${{ inputs.BuildType || 'Debug' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4.0.0
+      with:
+        submodules: true
+
+    - name: Declare variables
+      shell: bash
+      run: |
+        echo "git_short=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+        echo "git_branch=$(echo ${GITHUB_REF#refs/heads/})" >> "$GITHUB_ENV"
+
+    - name: Install libraries
+      run: sudo apt-get install libusb-1.0-0-dev libhidapi-dev -y
+
+    - name: Configure CMake
+      run: cmake --no-warn-unused-cli -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -H${{github.workspace}} -B${{github.workspace}}/bin -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "Unix Makefiles"
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/bin --config ${{env.BUILD_TYPE}} --target all -j 6
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3.1.3
+      with:
+        name: hidctrl-bin-${{ env.BUILD_TYPE }}-${{ env.git_short }}
+        path: |
+          ${{github.workspace}}/bin/*.so
+          ${{github.workspace}}/bin/variwizard
+        retention-days: 2
+
+    - name: Test
+      working-directory: ${{github.workspace}}/bin
+      run: ctest -C ${{env.BUILD_TYPE}}
+
