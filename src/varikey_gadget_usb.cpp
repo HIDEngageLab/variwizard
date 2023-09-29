@@ -246,6 +246,30 @@ namespace varikey
         }
 
         /**
+         * \brief set backlight color for varikey gadget
+         * 
+         * \param r red channel
+         * \param g green channel
+         * \param b blue channel
+         */
+        void usb::set_backlight_color(const uint8_t r, const uint8_t g, const uint8_t b)
+        {
+            command cmd;
+            cmd.report = static_cast<unsigned char>(varikey::report_id::CUSTOM);
+            cmd.command = static_cast<unsigned char>(varikey::command_id::BACKLIGHT);
+            cmd.payload.text[0] = 0xaa;
+            cmd.payload.text[1] = r;
+            cmd.payload.text[2] = g;
+            cmd.payload.text[3] = b;
+
+            if (send_report(device_handle, cmd) < 0)
+            {
+                close(device_handle);
+                device_handle = INVALID_HANDLE_VALUE;
+            }
+        }
+
+        /**
          * \brief get gadget processor temperature
          *
          * @return float

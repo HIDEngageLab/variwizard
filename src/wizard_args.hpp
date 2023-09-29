@@ -27,6 +27,9 @@ namespace wizard
         char *text;         /* text line */
         bool temperature;   /* get temperature */
         uint8_t backlight;  /* set backlight mode */
+        uint8_t r_value;    /* set backlight red channel */
+        uint8_t g_value;    /* set backlight green channel */
+        uint8_t b_value;    /* set backlight blue channel */
     };
 }
 

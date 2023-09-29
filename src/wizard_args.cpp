@@ -21,6 +21,7 @@ const char *argp_program_bug_address = ADDRESS();
 static struct argp_option options[] =
     {
         {"backlight", 'b', "MODE", 0, "set the backlight mode (check the docs)", 40},
+        {"backcolor", 'B', "RGB", 0, "set the backlight color with hex RRGGBB (check the docs)", 40},
         {"device", 'd', "DEVICE", 0, "device path", 10},
         {"font", 'f', "FONT", 0, "set font size (check the docs)", 20},
         {"icon", 'i', "ICON", 0, "draw predefined icon (check the docs)", 30},
@@ -43,6 +44,24 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
     case 'b':
         arguments->backlight = std::stoi(arg);
         break;
+    case 'B':
+    {
+        std::string color(arg);
+        if (color.length() == 6)
+        {
+            int r, g, b;
+            sscanf(color.substr(0, 2).c_str(), "%x", &r);
+            sscanf(color.substr(2, 2).c_str(), "%x", &g);
+            sscanf(color.substr(4, 2).c_str(), "%x", &b);
+
+            arguments->r_value = static_cast<uint8_t>(r & 0xff);
+            arguments->g_value = static_cast<uint8_t>(g & 0xff);
+            arguments->b_value = static_cast<uint8_t>(b & 0xff);
+
+            arguments->backlight = 0xaa;
+        }
+    }
+    break;
     case 'd':
         arguments->device = arg;
         break;

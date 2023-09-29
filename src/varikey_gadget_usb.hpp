@@ -42,6 +42,7 @@ namespace varikey
             void set_font_size(const int font_size);
             void print_text(const char *text);
             void set_backlight_mode(const int mode);
+            void set_backlight_color(const uint8_t r, const uint8_t g, const uint8_t b);
 
             float get_temperature();
 

@@ -19,6 +19,7 @@ static void set_font_size(wizard::usb &, const uint32_t unique, const uint8_t fo
 static void print_text(wizard::usb &, const uint32_t unique, const std::string &text);
 static void get_temperature(wizard::usb &, const uint32_t unique);
 static void set_backlight(wizard::usb &, const uint32_t unique, const uint8_t mode);
+static void set_backlight_color(wizard::usb &, const uint32_t unique, const uint8_t r, const uint8_t g, const uint8_t b);
 
 int main(int argc, char *argv[])
 {
@@ -52,13 +53,18 @@ int main(int argc, char *argv[])
 			get_temperature(wizard_usb_object, arguments.unique);
 		}
 
-		if (arguments.backlight != 0xff)
+		if (arguments.backlight == 0xaa)
+		{
+			set_backlight_color(wizard_usb_object, arguments.unique,
+								arguments.r_value, arguments.g_value, arguments.b_value);
+		}
+		else if (arguments.backlight != 0xff)
 		{
 			set_backlight(wizard_usb_object, arguments.unique, arguments.backlight);
 		}
 
 		if (arguments.list != false)
-		{			
+		{
 			wizard_usb_object.list_devices();
 		}
 
@@ -193,6 +199,21 @@ static void set_backlight(wizard::usb &wizard_usb_object, const uint32_t unique,
 	if (gadget.is_valid() && gadget.is_open())
 	{
 		gadget.set_backlight_mode(mode);
+		wizard_usb_object.close_device(gadget);
+	}
+	else
+	{
+		std::cout << "invalid device" << std::endl;
+	}
+}
+
+static void set_backlight_color(wizard::usb &wizard_usb_object, const uint32_t unique,
+								const uint8_t r, const uint8_t g, const uint8_t b)
+{
+	varikey::gadget::usb &gadget = wizard_usb_object.open_device(unique);
+	if (gadget.is_valid() && gadget.is_open())
+	{
+		gadget.set_backlight_color(r, g, b);
 		wizard_usb_object.close_device(gadget);
 	}
 	else

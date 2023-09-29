@@ -35,7 +35,7 @@ jobs:
       run: |
         echo "git_short=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
         echo "git_branch=$(echo ${GITHUB_REF_NAME/\//-})" >> "$GITHUB_ENV"
-        
+
     - name: Generate SBOM
       id: sbom
       env:

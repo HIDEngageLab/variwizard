@@ -1,0 +1,44 @@
+{
+    // Verwendet IntelliSense zum Ermitteln möglicher Attribute.
+    // Zeigen Sie auf vorhandene Attribute, um die zugehörigen Beschreibungen anzuzeigen.
+    // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "wizard",
+            "type": "cppdbg",
+            "request": "launch",
+            "externalConsole": false,
+            "program": "${workspaceFolder}/bin/wizard",
+            //"args": [
+            //    "-l",
+            //    "/dev/hidraw"
+            //],
+            "args": [
+                "-d",
+                "/dev/hidraw",
+                "-u",
+                "824793860",
+                "-B",
+                "abcdef"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "miDebuggerPath": "${workspaceFolder}/gdb.sh",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Automatische Strukturierung und Einrückung für \"gdb\" aktivieren",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Disassemblierungsvariante auf Intel festlegen",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}

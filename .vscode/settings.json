@@ -1,0 +1,48 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/.vscode": false,
+        "**/bin": true,
+    },
+    "cSpell.language": "en,de",
+    "cSpell.words": [
+        "varikey",
+        "VARIKEY"
+    ],
+    "C_Cpp.vcFormat.indent.braces": true,
+    "C_Cpp.clang_format_sortIncludes": true,
+    "cmake.buildDirectory": "${workspaceFolder}/bin",
+    "python.formatting.provider": "yapf",
+    "doxdocgen.file.copyrightTag": [
+        "Copyright (c) {year}, Roman Koch, koch.roman@gmail.com",
+        "SPDX-License-Identifier: MIT"
+    ],
+    "doxdocgen.file.fileTemplate": "\\file {name}",
+    "doxdocgen.generic.authorEmail": "koch.roman@gmail.com",
+    "doxdocgen.generic.authorName": "Roman Koch",
+    "doxdocgen.generic.authorTag": "\\author {author} ({email})",
+    "doxdocgen.generic.briefTemplate": "\\brief {text}",
+    "doxdocgen.generic.dateTemplate": "\\date {date}",
+    "doxdocgen.generic.paramTemplate": "\\param {param} ",
+    "doxdocgen.generic.returnTemplate": "\\return {type} ",
+    "doxdocgen.file.fileOrder": [
+        "file",
+        "author",
+        "empty",
+        "copyright"
+    ],
+    "doxdocgen.generic.order": [
+        "brief",
+        "empty",
+        "tparam",
+        "param",
+        "return",
+    ],
+    "files.associations": {
+    }
+}
