@@ -10,18 +10,67 @@
             "request": "launch",
             "externalConsole": false,
             "program": "${workspaceFolder}/bin/wizard",
-            //"args": [
-            //    "-l",
-            //    "/dev/hidraw"
-            //],
+            // "args": [
+            //     "-l",
+            //     "/dev/hidraw"
+            // ],
+            // "args": [
+            //     "-s",
+            //     "0"
+            // ],
+            // "args": [
+            //     "-M"
+            // ],
+            // "args": [
+            //     "-k",
+            //     "2"
+            // ],
+            // "args": [
+            //      //"-b",
+            //      //"9"
+            //      "-Bff0000"
+            //      //"-6",
+            //      //"112233",
+            //      //"-7",
+            //      //"445566"
+            // ],
+            // "args": [
+            //     "-t"
+            //  ],
+            //  "args": [
+            //     "--set-output=2"
+            //  ],
             "args": [
-                "-d",
-                "/dev/hidraw",
-                "-u",
-                "824793860",
-                "-B",
-                "abcdef"
-            ],
+                "-t",
+                "--get-parameter=17"
+             ],
+            // "args": [
+            //     "--set-parameter=17",
+            //     "00",
+            //     "11",
+            //     "22",
+            //     "33",
+            //     "44",
+            //     "55",
+            //     "66",
+            //     "77",
+            //     "88",
+            //     "99",
+            //     "aa",
+            //     "bb",
+            //     "-t"
+            //  ],
+            //  "args": [
+            //     "--direction=2"
+            //  ],
+            // "args": [
+            //     "-r"
+            //  ],
+            //"args": [
+            //    "--icon=5",
+            //    "--line=0",
+            //    "--column=0"
+            //],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
