@@ -15,21 +15,27 @@ namespace wizard
 {
     struct arguments
     {
-        const char *device; /* wizard device */
-        uint32_t unique;    /* unique identifier */
-        bool verbose;       /* verbose flag */
-        bool list;          /* devices list */
-        bool reset;         /* reset flag */
-        uint8_t line;       /* line position  */
-        uint8_t column;     /* column position */
-        uint8_t icon;       /* predefined icon */
-        uint8_t font_size;  /* text line */
-        char *text;         /* text line */
-        bool temperature;   /* get temperature */
-        uint8_t backlight;  /* set backlight mode */
-        uint8_t r_value;    /* set backlight red channel */
-        uint8_t g_value;    /* set backlight green channel */
-        uint8_t b_value;    /* set backlight blue channel */
+        const char *device;    /* wizard device */
+        uint16_t pid;          /* usb pid */
+        uint16_t vid;          /* usb vid */
+        uint32_t unique;       /* unique identifier */
+        bool verbose;          /* verbose flag */
+        bool list;             /* devices list */
+        bool reset;            /* reset flag */
+        bool clean;            /* clean up display */
+        uint8_t line;          /* line position  */
+        uint8_t column;        /* column position */
+        uint8_t icon;          /* predefined icon */
+        uint8_t font_size;     /* text line */
+        char *text;            /* text line */
+        bool temperature;      /* get temperature */
+        uint8_t backlight;     /* set backlight mode */
+        uint8_t r_left_value;  /* set left backlight red channel */
+        uint8_t g_left_value;  /* set left backlight green channel */
+        uint8_t b_left_value;  /* set left backlight blue channel */
+        uint8_t r_right_value; /* set right backlight red channel */
+        uint8_t g_right_value; /* set right backlight green channel */
+        uint8_t b_right_value; /* set right backlight blue channel */
     };
 }
 

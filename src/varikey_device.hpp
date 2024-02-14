@@ -11,24 +11,29 @@
 
 #include <stdint.h>
 
-#include "varikey_gadget.hpp"
-
-#define VARIKEY_SERIAL_NUMBER_SIZE 12
-#define VARIKEY_NAME_SIZE 32
-
 namespace varikey
 {
+    static const size_t SERIAL_NUMBER_SIZE = 12;
+    static const size_t PLATFORM_SIZE = 32;
+    static const size_t PRODUCT_SIZE = 32;
+    static const size_t NAME_SIZE = 32;
+
     struct device
     {
         uint32_t bustype;
         uint16_t vendor;
         uint16_t product;
-        char name[VARIKEY_NAME_SIZE];
-        uint8_t serial[VARIKEY_SERIAL_NUMBER_SIZE];
+        char name[NAME_SIZE];
+        uint8_t serial[SERIAL_NUMBER_SIZE];
         uint32_t unique;
-        gadget::type gadget;
-        uint32_t hardware;
-        uint32_t version;
+        uint16_t firmware;
+        uint16_t revision;
+        uint16_t patch;
+        uint16_t build;
+        uint16_t maintainer;
+        uint16_t hardware;
+        uint8_t number;
+        uint8_t variant;
     };
 }
 

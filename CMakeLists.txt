@@ -3,6 +3,8 @@
 
 cmake_minimum_required(VERSION 3.22)
 
+#include(varikey-import.cmake)
+
 project(wizard 
 VERSION 1.0.0.0
 DESCRIPTION "Custom composed HID device controller"
@@ -18,11 +20,16 @@ add_compile_options(-Wall -fPIC -g)
 
 add_library(_varikey
     src/varikey_gadget_usb.cpp
+    src/macros.cpp
 )
 
 add_executable(wizard
     src/wizard.cpp
     src/wizard_args.cpp
+)
+
+add_executable(report-example 
+    src/report-example.cpp
 )
 
 execute_process (COMMAND bash -c "git rev-parse --short=4 HEAD | tr -d '\n'" OUTPUT_VARIABLE GIT_HASH)
@@ -40,3 +47,4 @@ target_include_directories(wizard PUBLIC
 )
 
 target_link_libraries(wizard PRIVATE _varikey)
+target_link_libraries(report-example PRIVATE _varikey)

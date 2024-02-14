@@ -9,17 +9,23 @@
 #include <iostream>
 #include <string>
 
+#include "wizard.hpp"
 #include "wizard_args.hpp"
 #include "wizard_usb.hpp"
 
+bool VERBOSE_OUTPUT = true;
+
 static void reset_device(wizard::usb &, const uint32_t unique);
 static void set_position(wizard::usb &, const uint32_t unique, const uint8_t line, const uint8_t column);
+static void clean_display(wizard::usb &, const uint32_t unique);
 static void draw_icon(wizard::usb &, const uint32_t unique, const uint8_t icon);
 static void set_font_size(wizard::usb &, const uint32_t unique, const uint8_t font_size);
 static void print_text(wizard::usb &, const uint32_t unique, const std::string &text);
 static void get_temperature(wizard::usb &, const uint32_t unique);
 static void set_backlight(wizard::usb &, const uint32_t unique, const uint8_t mode);
-static void set_backlight_color(wizard::usb &, const uint32_t unique, const uint8_t r, const uint8_t g, const uint8_t b);
+static void set_backlight_color(wizard::usb &, const uint32_t unique, const uint8_t mode,
+								const uint8_t lr, const uint8_t lg, const uint8_t lb,
+								const uint8_t rr, const uint8_t rg, const uint8_t rb);
 
 int main(int argc, char *argv[])
 {
@@ -27,7 +33,7 @@ int main(int argc, char *argv[])
 	wizard_arguments_init(arguments);
 	wizard_arguments_parse(arguments, argc, argv);
 
-	static const bool VERBOSE_OUTPUT = arguments.verbose;
+	VERBOSE_OUTPUT = arguments.verbose;
 
 	wizard::usb wizard_usb_object;
 
@@ -39,7 +45,8 @@ int main(int argc, char *argv[])
 		if (VERBOSE_OUTPUT)
 			std::cout << "scan devices" << std::endl;
 
-		wizard_usb_object.scan_devices(arguments.device);
+		wizard_usb_object.scan_devices(arguments.device,
+									   arguments.pid, arguments.vid);
 	}
 
 	if (arguments.reset != false)
@@ -53,10 +60,13 @@ int main(int argc, char *argv[])
 			get_temperature(wizard_usb_object, arguments.unique);
 		}
 
-		if (arguments.backlight == 0xaa)
+		if (arguments.backlight == (int)varikey::backlight::PROGRAM::MORPH ||
+			arguments.backlight == (int)varikey::backlight::PROGRAM::SET)
 		{
 			set_backlight_color(wizard_usb_object, arguments.unique,
-								arguments.r_value, arguments.g_value, arguments.b_value);
+								arguments.backlight,
+								arguments.r_left_value, arguments.g_left_value, arguments.b_left_value,
+								arguments.r_right_value, arguments.g_right_value, arguments.b_right_value);
 		}
 		else if (arguments.backlight != 0xff)
 		{
@@ -75,6 +85,11 @@ int main(int argc, char *argv[])
 		else if (!(arguments.column == 0xff && arguments.line == 0xff))
 		{
 			std::cout << "needs row and column values to set position" << std::endl;
+		}
+
+		if (arguments.clean)
+		{
+			clean_display(wizard_usb_object, arguments.unique);
 		}
 
 		if (arguments.icon != 0xff)
@@ -123,6 +138,20 @@ static void set_position(wizard::usb &wizard_usb_object, const uint32_t unique,
 	if (gadget.is_valid() && gadget.is_open())
 	{
 		gadget.set_position(line, column);
+		wizard_usb_object.close_device(gadget);
+	}
+	else
+	{
+		std::cout << "invalid device" << std::endl;
+	}
+}
+
+static void clean_display(wizard::usb &wizard_usb_object, const uint32_t unique)
+{
+	varikey::gadget::usb &gadget = wizard_usb_object.open_device(unique);
+	if (gadget.is_valid() && gadget.is_open())
+	{
+		gadget.clean_display();
 		wizard_usb_object.close_device(gadget);
 	}
 	else
@@ -208,12 +237,14 @@ static void set_backlight(wizard::usb &wizard_usb_object, const uint32_t unique,
 }
 
 static void set_backlight_color(wizard::usb &wizard_usb_object, const uint32_t unique,
-								const uint8_t r, const uint8_t g, const uint8_t b)
+								const uint8_t mode,
+								const uint8_t lr, const uint8_t lg, const uint8_t lb,
+								const uint8_t rr, const uint8_t rg, const uint8_t rb)
 {
 	varikey::gadget::usb &gadget = wizard_usb_object.open_device(unique);
 	if (gadget.is_valid() && gadget.is_open())
 	{
-		gadget.set_backlight_color(r, g, b);
+		gadget.set_backlight_color(mode, lr, lg, lb, rr, rg, rb);
 		wizard_usb_object.close_device(gadget);
 	}
 	else

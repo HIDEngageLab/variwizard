@@ -7,6 +7,7 @@
  */
 
 #include <cstdio>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 
@@ -16,18 +17,8 @@
 
 #include "varikey_command.hpp"
 #include "varikey_device.hpp"
+#include "wizard_args.hpp"
 #include "wizard_usb.hpp"
-
-/**
- * @brief USB device identifiers
- *
- * 0xcafe=51966, 0x4004=16388
- * attention: devices are filtered by product:vendor values
- * @{
- */
-#define VARIKEY_VENDOR_IDENTIFIER 0xcafe
-#define VARIKEY_PRODUCT_IDENTIFIER 0x4004
-/** }@ */
 
 /**
  * @brief max number of expected hid devices for a scan
@@ -48,7 +39,8 @@ namespace wizard
 	 * @param _device_pattern example: /dev/hidraw for /dev/hidraw0... /dev/hidraw15
 	 * @return int number of devices
 	 */
-	int usb::scan_devices(const std::string &_device_pattern)
+	int usb::scan_devices(const std::string &_device_pattern,
+						  const uint16_t pid, const uint16_t vid)
 	{
 		for (int i = 0; i < MAX_HID_NUMBER; ++i)
 		{
@@ -58,13 +50,16 @@ namespace wizard
 			device_descriptor tmp;
 			tmp.device.usb_open(device_name.str().c_str());
 
-			if (tmp.device.is_open())
+			if (tmp.device.get_vendor() == vid && tmp.device.get_product() == pid)
 			{
-				tmp.device_path = device_name.str();
-				tmp.device.usb_init();
-				tmp.device.usb_close();
-
-				descriptor.push_back(tmp);
+				if (tmp.device.is_open())
+				{
+					tmp.device_path = device_name.str();
+					tmp.device.usb_init();
+					tmp.device.usb_close();
+					if (tmp.device.is_valid())
+						descriptor.push_back(tmp);
+				}
 			}
 		}
 
@@ -126,6 +121,18 @@ namespace wizard
 		{
 			std::cout << "list devices" << std::endl;
 		}
+		std::cout.width(25);
+		std::cout << std::left << "unique";
+		std::cout.width(25);
+		std::cout << std::left << "hardware";
+		std::cout.width(25);
+		std::cout << std::left << "firmware";
+		std::cout.width(8);
+		std::cout << std::left << "pid";
+		std::cout.width(8);
+		std::cout << std::left << "vid";
+		std::cout << std::left << "path";
+		std::cout << std::endl;
 		for (auto &i : descriptor)
 		{
 			if (i.device.is_valid())
@@ -133,15 +140,34 @@ namespace wizard
 				i.device.usb_open(i.device_path.c_str());
 				if (i.device.is_open())
 				{
-					int unique = i.device.get_unique();
-					int gadget = static_cast<int>(i.device.get_gadget());
-					int hardware = i.device.get_hardware();
-					int version = i.device.get_version();
+					unsigned int unique = i.device.get_unique();
+					unsigned int hardware = i.device.get_hardware();
+					unsigned int number = i.device.get_number();
+					unsigned int variant = i.device.get_variant();
+					unsigned int firmware = i.device.get_firmware();
+					unsigned int revision = i.device.get_revision();
+					unsigned int patch = i.device.get_patch();
+					unsigned int pid = i.device.get_product();
+					unsigned int vid = i.device.get_vendor();
 
-					std::cout << std::hex << "unique 0x" << unique << "(" << std::dec << unique << ") ";
-					std::cout << std::dec << "gadget " << gadget << " ";
-					std::cout << std::hex << "hardware 0x" << hardware << "(" << std::dec << hardware << ") ";
-					std::cout << std::hex << "version 0x" << version << "(" << std::dec << version << ") ";
+					std::cout << "0x" << std::hex << std::right << std::setw(8);
+					auto default_fill_value = std::cout.fill('0');
+					std::cout << unique;
+					std::cout.fill(default_fill_value);
+					std::cout << "(" << std::dec << std::right << std::setw(12) << unique << ") ";
+
+					std::stringstream hw;
+					hw << std::dec << hardware << '.' << number << '/' << variant;
+					std::cout << std::left << std::setw(24) << hw.str() << " ";
+
+					std::stringstream fw;
+					fw << firmware << '.' << revision << '.' << patch;
+					std::cout << std::left << std::setw(24) << fw.str() << " ";
+
+					std::cout << std::right << std::hex << "0x" << std::setfill('0') << std::setw(4) << pid << "  ";
+
+					std::cout << std::right << std::hex << "0x" << std::setfill('0') << std::setw(4) << vid << "  ";
+
 					std::cout << i.device_path;
 					std::cout << std::endl;
 

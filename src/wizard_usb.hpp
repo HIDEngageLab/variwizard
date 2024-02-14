@@ -24,7 +24,8 @@ namespace wizard
 		usb();
 		virtual ~usb();
 
-		int scan_devices(const std::string &);
+		int scan_devices(const std::string &,
+						 const uint16_t pid, const uint16_t vid);
 
 		varikey::gadget::usb &open_device(const uint32_t);
 		void close_device(varikey::gadget::usb &);
