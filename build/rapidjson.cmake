@@ -1,7 +1,9 @@
 # Copyright (c) 2023, Roman Koch, koch.roman@gmail.com
 # SPDX-License-Identifier: MIT
+
 # Download RapidJSON
 # https://www.jibbow.com/posts/rapidjson-cmake/
+
 ExternalProject_Add(rapidjson 
     PREFIX "rapidjson"
     GIT_REPOSITORY "https://github.com/Tencent/rapidjson.git"

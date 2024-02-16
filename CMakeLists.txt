@@ -19,12 +19,23 @@ enable_testing()
 
 add_compile_options(-Wall -fPIC -g)
 
-add_library(_varikey
+execute_process (COMMAND bash -c "git rev-parse --short=4 HEAD | tr -d '\n'" OUTPUT_VARIABLE GIT_HASH)
+configure_file(${PROJECT_SOURCE_DIR}/build/wizard_revision.h.in ${PROJECT_SOURCE_DIR}/src/wizard_revision.h @ONLY)
+
+set(EXECUTABLE_NAME "${PROJECT_NAME}")
+string(TOLOWER ${EXECUTABLE_NAME} EXECUTABLE_NAME)
+
+set(LIBRARY_NAME "${PROJECT_NAME}_lib")
+string(TOLOWER ${LIBRARY_NAME} LIBRARY_NAME)
+
+include("${CMAKE_SOURCE_DIR}/build/graffiti.cmake")
+
+add_library(${LIBRARY_NAME}
     src/varikey/varikey_gadget_usb.cpp
     src/pulp/macros.cpp
 )
 
-add_executable(wizard
+add_executable(${EXECUTABLE_NAME}
     src/wizard/wizard.cpp
     src/wizard/wizard_args.cpp
 )
@@ -33,17 +44,16 @@ add_executable(report-example
     src/example/report-example.cpp
 )
 
-execute_process (COMMAND bash -c "git rev-parse --short=4 HEAD | tr -d '\n'" OUTPUT_VARIABLE GIT_HASH)
-configure_file(${PROJECT_SOURCE_DIR}/build/wizard_revision.h.in ${PROJECT_SOURCE_DIR}/src/wizard_revision.h @ONLY)
+add_dependencies(${EXECUTABLE_NAME} ascii_art)
 
-target_sources(wizard PUBLIC
+target_sources(${EXECUTABLE_NAME} PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/src/wizard/wizard_args.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/wizard/wizard_config.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/wizard/wizard_usb.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/wizard/wizard.cpp
 )
 
-target_include_directories(wizard PUBLIC
+target_include_directories(${EXECUTABLE_NAME} PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/
     ${CMAKE_CURRENT_LIST_DIR}/build/
     ${CMAKE_CURRENT_LIST_DIR}/src/
@@ -53,7 +63,7 @@ target_include_directories(wizard PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/src/wizard/
 )
 
-target_include_directories(_varikey PUBLIC
+target_include_directories(${LIBRARY_NAME} PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/
     ${CMAKE_CURRENT_LIST_DIR}/build/
     ${CMAKE_CURRENT_LIST_DIR}/src/
@@ -63,15 +73,15 @@ target_include_directories(_varikey PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/src/wizard/
 )
     
-target_include_directories(_varikey SYSTEM PRIVATE
+target_include_directories(${LIBRARY_NAME} SYSTEM PRIVATE
     ${RAPIDJSON_INCLUDE_DIR}
 )
 
-target_include_directories(wizard SYSTEM PRIVATE
+target_include_directories(${EXECUTABLE_NAME} SYSTEM PRIVATE
     ${RAPIDJSON_INCLUDE_DIR}
 )
 
-target_link_libraries(wizard PRIVATE _varikey)
-target_link_libraries(report-example PRIVATE _varikey)
+target_link_libraries(${EXECUTABLE_NAME} PRIVATE ${LIBRARY_NAME})
+target_link_libraries(report-example PRIVATE ${LIBRARY_NAME})
 
-add_dependencies(wizard rapidjson)
+add_dependencies(${EXECUTABLE_NAME} rapidjson)
