@@ -7,10 +7,10 @@
  */
 
 #include <iostream>
-#include <string>
 
 #include "wizard.hpp"
 #include "wizard_args.hpp"
+#include "wizard_config.hpp"
 #include "wizard_usb.hpp"
 
 bool VERBOSE_OUTPUT = true;
@@ -29,58 +29,60 @@ static void set_backlight_color(wizard::usb &, const uint32_t unique, const uint
 
 int main(int argc, char *argv[])
 {
+	wizard::config::load();
+
 	wizard::arguments arguments;
 	wizard_arguments_init(arguments);
 	wizard_arguments_parse(arguments, argc, argv);
 
 	VERBOSE_OUTPUT = arguments.verbose;
 
-	wizard::usb wizard_usb_object;
-
 	if (VERBOSE_OUTPUT)
 		std::cout << "start " << argv[0] << std::endl;
 
-	if (arguments.device != nullptr)
+	const std::string device_path = wizard::config::get_device();
+	const uint32_t serial_number = wizard::config::get_serial();
+	if (arguments.list != false)
 	{
-		if (VERBOSE_OUTPUT)
-			std::cout << "scan devices" << std::endl;
-
-		wizard_usb_object.scan_devices(arguments.device,
+		wizard::usb wizard_usb_object;
+		wizard_usb_object.scan_devices(arguments.devices_directory,
 									   arguments.pid, arguments.vid);
+		wizard_usb_object.list_devices();
 	}
-
-	if (arguments.reset != false)
+	else if (arguments.reset != false)
 	{
-		reset_device(wizard_usb_object, arguments.unique);
+		wizard::usb wizard_usb_object;
+		wizard_usb_object.scan_devices(device_path,
+									   arguments.pid, arguments.vid);
+		reset_device(wizard_usb_object, serial_number);
 	}
 	else
 	{
+		wizard::usb wizard_usb_object;
+		wizard_usb_object.scan_devices(device_path,
+									   arguments.pid, arguments.vid);
+
 		if (arguments.temperature != false)
 		{
-			get_temperature(wizard_usb_object, arguments.unique);
+			get_temperature(wizard_usb_object, serial_number);
 		}
 
 		if (arguments.backlight == (int)varikey::backlight::PROGRAM::MORPH ||
 			arguments.backlight == (int)varikey::backlight::PROGRAM::SET)
 		{
-			set_backlight_color(wizard_usb_object, arguments.unique,
+			set_backlight_color(wizard_usb_object, serial_number,
 								arguments.backlight,
 								arguments.r_left_value, arguments.g_left_value, arguments.b_left_value,
 								arguments.r_right_value, arguments.g_right_value, arguments.b_right_value);
 		}
 		else if (arguments.backlight != 0xff)
 		{
-			set_backlight(wizard_usb_object, arguments.unique, arguments.backlight);
-		}
-
-		if (arguments.list != false)
-		{
-			wizard_usb_object.list_devices();
+			set_backlight(wizard_usb_object, serial_number, arguments.backlight);
 		}
 
 		if (arguments.column != 0xff && arguments.line != 0xff)
 		{
-			set_position(wizard_usb_object, arguments.unique, arguments.line, arguments.column);
+			set_position(wizard_usb_object, serial_number, arguments.line, arguments.column);
 		}
 		else if (!(arguments.column == 0xff && arguments.line == 0xff))
 		{
@@ -89,23 +91,23 @@ int main(int argc, char *argv[])
 
 		if (arguments.clean)
 		{
-			clean_display(wizard_usb_object, arguments.unique);
+			clean_display(wizard_usb_object, serial_number);
 		}
 
 		if (arguments.icon != 0xff)
 		{
-			draw_icon(wizard_usb_object, arguments.unique, arguments.icon);
+			draw_icon(wizard_usb_object, serial_number, arguments.icon);
 		}
 		else if (arguments.text != nullptr)
 		{
-			if (arguments.unique != 0)
+			if (serial_number != 0)
 			{
 				if (arguments.font_size != 0xff)
 				{
-					set_font_size(wizard_usb_object, arguments.unique, arguments.font_size);
+					set_font_size(wizard_usb_object, serial_number, arguments.font_size);
 				}
 
-				print_text(wizard_usb_object, arguments.unique, arguments.text);
+				print_text(wizard_usb_object, serial_number, arguments.text);
 			}
 			else
 			{

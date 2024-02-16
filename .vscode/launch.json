@@ -10,21 +10,11 @@
             "request": "launch",
             "externalConsole": false,
             "program": "${workspaceFolder}/bin/wizard",
-            //"args": [
-            //    "-l",
-            //    "/dev/hidraw"
-            //],
+            "args": [
+                "-l",
+                "/dev/hidraw"
+            ],
             // "args": [
-            //     "-l",
-            //     "/dev/hidraw",
-            //     "-p",
-            //     "36",
-            //     "-v",
-            //     "48879"
-            // ],
-            // "args": [
-            //      "-d/dev/hidraw",
-            //      "-u3024464595",
             //      //"-b",
             //      //"9"
             //      "-Bff0000"
@@ -34,26 +24,16 @@
             //      //"445566"
             // ],
             //"args": [
-            //    "-d",
-            //    "/dev/hidraw",
-            //    "-u",
-            //    "3024464595",
             //    "-t"
             //],
             // "args": [
-            //     "-d",
-            //     "/dev/hidraw",
-            //     "-u",
-            //     "3024464595",
             //     "-r"
             //  ],
-            "args": [
-                "-d/dev/hidraw",
-                "-u3024464595",
-                "--icon=5",
-                "--line=0",
-                "--column=0"
-            ],
+            //"args": [
+            //    "--icon=5",
+            //    "--line=0",
+            //    "--column=0"
+            //],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

@@ -18,7 +18,9 @@
         "HIDIOCGRAWINFO",
         "HIDIOCGRAWNAME",
         "hidraw",
+        "rapidjson",
         "uvalue",
+        "Vari",
         "varikey",
         "VARIKEY"
     ],
@@ -101,6 +103,12 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "bitset": "cpp",
+        "ctime": "cpp",
+        "map": "cpp",
+        "regex": "cpp",
+        "fstream": "cpp",
+        "cinttypes": "cpp"
     }
 }

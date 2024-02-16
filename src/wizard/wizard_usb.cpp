@@ -17,6 +17,7 @@
 
 #include "varikey_command.hpp"
 #include "varikey_device.hpp"
+#include "wizard.hpp"
 #include "wizard_args.hpp"
 #include "wizard_usb.hpp"
 
@@ -42,6 +43,9 @@ namespace wizard
 	int usb::scan_devices(const std::string &_device_pattern,
 						  const uint16_t pid, const uint16_t vid)
 	{
+		if (VERBOSE_OUTPUT)
+			std::cout << "scan devices" << std::endl;
+
 		for (int i = 0; i < MAX_HID_NUMBER; ++i)
 		{
 			std::stringstream device_name;

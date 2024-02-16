@@ -31,12 +31,10 @@ const char *argp_program_bug_address = ADDRESS();
 
 static struct argp_option options[] =
     {
-        {"device", 'd', "DEVICE", 0, "device path pattern (/dev/hidraw for /dev/hidraw0...15)", 10},
         {"list", 'l', "PATH", 0, "devices list", 10},
         {"pid", 'p', "PID", 0, "product identifier", 10},
         {"vid", 'v', "VID", 0, "vendor identifier", 10},
         {"reset", 'r', 0, 0, "reset wizard device", 10},
-        {"unique", 'u', "UNIQUE", 0, "get unique gadget identifier", 10},
         {"verbose", 'V', 0, 0, "more output", 10},
         {"clean", 'c', 0, 0, "clean up display", 20},
         {"column", 'x', "COLUMN", 0, "set the column for the next output (0-127)", 20},
@@ -127,9 +125,6 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         }
         break;
     }
-    case 'd':
-        arguments->device = arg;
-        break;
     case 'p':
         arguments->pid = std::stoi(arg);
         break;
@@ -144,7 +139,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         break;
     case 'l':
         arguments->list = true;
-        arguments->device = arg;
+        arguments->devices_directory = arg;
         break;
     case 'm':
         arguments->text = arg;
@@ -154,9 +149,6 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         break;
     case 't':
         arguments->temperature = true;
-        break;
-    case 'u':
-        arguments->unique = std::stol(arg);
         break;
     case 'V':
         arguments->verbose = true;
@@ -194,10 +186,9 @@ static struct argp argp = {options, parse_opt, 0, doc, NULL, NULL, NULL};
  */
 extern void wizard_arguments_init(wizard::arguments &arguments)
 {
-    arguments.device = nullptr;
+    arguments.devices_directory = nullptr;
     arguments.pid = DEFAULT_PRODUCT_IDENTIFIER;
     arguments.vid = DEFAULT_VENDOR_IDENTIFIER;
-    arguments.unique = 0;
     arguments.verbose = false;
     arguments.list = false;
     arguments.reset = false;
