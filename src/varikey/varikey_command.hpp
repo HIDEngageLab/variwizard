@@ -45,7 +45,7 @@ namespace varikey
         /** \brief Anonymous function data type */
         enum VALUE
         {
-            CUSTOM = 0x80,
+            CLEAN = 0x08,
             DISABLE = 0x03,
             ENABLE = 0x02,
             GET = 0x00,
@@ -54,6 +54,8 @@ namespace varikey
             SET = 0x01,
             START = 0x04,
             STOP = 0x05,
+
+            CUSTOM = 0x80,
 
             UNDEFINED = 0xFF,
         };
@@ -363,12 +365,15 @@ namespace varikey
     {
         using TABLE = varikey::keycode::TABLE;
 
-        enum class COMMAND : uint8_t
+        const uint8_t KEYPAD_ID = int(varikey::IDENTIFIER::KEYPAD);
+
+        enum class IDENTIFIER : uint8_t
         {
-            CAPS = varikey::IDENTIFIER::KEYPAD + 0,
-            INDICATION = varikey::IDENTIFIER::KEYPAD + 1,
-            NUM = varikey::IDENTIFIER::KEYPAD + 2,
-            SCROLL = varikey::IDENTIFIER::KEYPAD + 3,
+            HCI = KEYPAD_ID + 2,
+            HID = KEYPAD_ID + 3,
+            KEYCODE = KEYPAD_ID + 4,
+            MAPPING = KEYPAD_ID + 1,
+
             UNDEFINED = (int)varikey::IDENTIFIER::UNDEFINED,
         };
 
@@ -378,6 +383,10 @@ namespace varikey
             ENABLE = function::ENABLE,
             GET = function::GET,
             SET = function::SET,
+            CLEAN = function::CLEAN,
+
+            CLICK = function::CUSTOM,
+            PUSH = function::CUSTOM + 1,
 
             UNDEFINED = (int)varikey::function::UNDEFINED,
         };
@@ -386,8 +395,11 @@ namespace varikey
         {
             IDENTIFIER identifier;
             FUNCTION function;
-            TABLE table;
-            uint8_t code;
+            union
+            {
+                TABLE table;
+                uint8_t code;
+            };
         };
     }
 
@@ -403,8 +415,9 @@ namespace varikey
             MAPPING = 0xB0,
             POSITION = 0x24,
             SERIAL_NUMBER = 0x11,
-            UNDEFINED = 0xff,
             USER = 0x70,
+
+            UNDEFINED = 0xff,
         };
 
         enum class FUNCTION : uint8_t
@@ -477,11 +490,14 @@ namespace varikey
 
     enum class REPORT : uint8_t
     {
-        SERIAL = (int)varikey::identity::IDENTIFIER::SERIAL,
-        UNIQUE = (int)varikey::identity::IDENTIFIER::UNIQUE,
         FIRMWARE = (int)varikey::identity::IDENTIFIER::FIRMWARE,
         HARDWARE = (int)varikey::identity::IDENTIFIER::HARDWARE,
+        MAPPING = (int)varikey::keypad::IDENTIFIER::MAPPING,
+        SERIAL = (int)varikey::identity::IDENTIFIER::SERIAL,
         TEMPERATURE = (int)varikey::IDENTIFIER::TEMPERATURE,
+        UNIQUE = (int)varikey::identity::IDENTIFIER::UNIQUE,
+
+        UNDEFINED = 0xff,
     };
 
     struct __attribute__((__packed__)) feature
@@ -491,6 +507,7 @@ namespace varikey
         {
             identity::content_t identity;
             temperature::content_t temperature;
+            keypad::content_t keypad;
         };
     };
 }

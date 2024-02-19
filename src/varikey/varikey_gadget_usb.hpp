@@ -41,18 +41,28 @@ namespace varikey
             bool is_open() const;
             bool is_valid() const { return device_valid; }
 
+            void clean_display();
+            void set_position(const int line, const int column);
+            void set_font_size(const int font_size);
+            void print_text(const char *text);
+            void draw_icon(const int icon);
+
             void set_backlight_mode(const uint8_t mode);
             void set_backlight_color(const uint8_t mode,
                                      const uint8_t lr, const uint8_t lg, const uint8_t lb,
                                      const uint8_t rr, const uint8_t rg, const uint8_t rb);
 
-            void set_position(const int line, const int column);
-            void clean_display();
-            void draw_icon(const int icon);
-            void set_font_size(const int font_size);
-            void print_text(const char *text);
-
             float get_temperature();
+
+            void set_gadget(const uint8_t mode);
+
+            void send_keycode(const uint8_t mode);
+
+            void enable_interface(const uint8_t interface, const bool enable);
+
+            void set_mapping(const uint8_t map);
+            uint8_t get_mapping();
+            void clean_mapping();
 
         private:
             bool usb_get_serial();

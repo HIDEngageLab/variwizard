@@ -35,3 +35,4 @@ bin
 src/wizard_revision.h
 src/build_number.h
 #.vscode
+config.json

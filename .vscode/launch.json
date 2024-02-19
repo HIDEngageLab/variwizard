@@ -10,10 +10,21 @@
             "request": "launch",
             "externalConsole": false,
             "program": "${workspaceFolder}/bin/wizard",
-            "args": [
-                "-l",
-                "/dev/hidraw"
-            ],
+            // "args": [
+            //     "-l",
+            //     "/dev/hidraw"
+            // ],
+            // "args": [
+            //     "-s",
+            //     "0"
+            // ],
+            // "args": [
+            //     "-M"
+            // ],
+            // "args": [
+            //     "-k",
+            //     "2"
+            // ],
             // "args": [
             //      //"-b",
             //      //"9"
@@ -23,9 +34,9 @@
             //      //"-7",
             //      //"445566"
             // ],
-            //"args": [
-            //    "-t"
-            //],
+            "args": [
+               "-t"
+            ],
             // "args": [
             //     "-r"
             //  ],

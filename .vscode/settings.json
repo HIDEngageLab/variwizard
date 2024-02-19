@@ -110,5 +110,17 @@
         "regex": "cpp",
         "fstream": "cpp",
         "cinttypes": "cpp"
+    },
+    "workbench.preferredDarkColorTheme": "Default Dark Modern",
+    "workbench.colorTheme": "Default Dark Modern",
+    "workbench.colorCustomizations": {
+        "[Default Dark Modern]": {
+            "tab.activeBackground": "#3f3f3f",
+            "tab.activeBorder": "#5f5f5f",
+            "tab.hoverBorder": "#5f5f5f",
+            "editor.background": "#0e0e0f",
+            "terminal.background": "#0e0e0f",
+            "outputView.background": "#0e0e0f"
+        }
     }
 }

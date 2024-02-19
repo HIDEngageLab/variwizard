@@ -341,20 +341,191 @@ namespace varikey
             {
                 feature cmd;
                 cmd.report = varikey::REPORT::TEMPERATURE;
+                cmd.temperature.function = varikey::temperature::FUNCTION::GET;
+                cmd.temperature.value = -1;
 
                 if (send_report(cmd, 1 + sizeof(varikey::temperature::content_t)) < 0)
                 {
-                    cmd.temperature.value = -1;
                     perror("send_report failed");
                     usb_close();
                 }
                 else
                 {
-                    return (cmd.temperature.value / 1000.0);
+                    return (cmd.temperature.value);
                 }
             }
 
             return (float)0xffff;
+        }
+
+        /**
+         * \brief set gadget state
+         *
+         * \param mode 0=MOUNT, 1=UNMOUNT, 2=SUSPEND and 3=RESUME
+         */
+        void usb::set_gadget(const uint8_t mode)
+        {
+            if (device_handle != INVALID_HANDLE_VALUE)
+            {
+                command cmd;
+                cmd.command = varikey::COMMAND::CUSTOM;
+                cmd.identifier = varikey::IDENTIFIER::GADGET;
+
+                switch (mode)
+                {
+                case 0:
+                    cmd.gadget.command = varikey::gadget::COMMAND::MOUNT;
+                    break;
+                case 1:
+                    cmd.gadget.command = varikey::gadget::COMMAND::UNMOUNT;
+                    break;
+                case 2:
+                    cmd.gadget.command = varikey::gadget::COMMAND::SUSPEND;
+                    break;
+                case 3:
+                    cmd.gadget.command = varikey::gadget::COMMAND::RESUME;
+                    break;
+                default:
+                    break;
+                }
+
+                if (send_report(cmd, 3) < 0)
+                {
+                    perror("send_report failed");
+                    usb_close();
+                }
+            }
+        }
+
+        /**
+         * \brief simulate key code
+         *
+         * \param mode
+         */
+        void usb::send_keycode(const uint8_t code)
+        {
+            if (device_handle != INVALID_HANDLE_VALUE)
+            {
+                command cmd;
+                cmd.command = varikey::COMMAND::CUSTOM;
+                cmd.identifier = varikey::IDENTIFIER::KEYPAD;
+                cmd.keypad.identifier = varikey::keypad::IDENTIFIER::KEYCODE;
+                cmd.keypad.function = varikey::keypad::FUNCTION::CLICK;
+                cmd.keypad.code = code;
+
+                if (send_report(cmd, 5) < 0)
+                {
+                    perror("send_report failed");
+                    usb_close();
+                }
+            }
+        }
+
+        /**
+         * \brief Enable/disable keypad events over HIC and HID interfaces
+         *
+         * \param interface 0=HCI, 1=HID
+         * \param enable true/false
+         */
+        void usb::enable_interface(const uint8_t interface, const bool enable)
+        {
+            if (device_handle != INVALID_HANDLE_VALUE)
+            {
+                command cmd;
+                cmd.command = varikey::COMMAND::CUSTOM;
+                cmd.identifier = varikey::IDENTIFIER::KEYPAD;
+                if (interface == 0)
+                    cmd.keypad.identifier = varikey::keypad::IDENTIFIER::HCI;
+                else if (interface == 1)
+                    cmd.keypad.identifier = varikey::keypad::IDENTIFIER::HID;
+                else
+                    cmd.keypad.identifier = varikey::keypad::IDENTIFIER::UNDEFINED;
+                if (enable)
+                    cmd.keypad.function = varikey::keypad::FUNCTION::ENABLE;
+                else
+                    cmd.keypad.function = varikey::keypad::FUNCTION::DISABLE;
+
+                if (send_report(cmd, 4) < 0)
+                {
+                    perror("send_report failed");
+                    usb_close();
+                }
+            }
+        }
+
+        /**
+         * \brief Set keypad mapping
+         *
+         * \param map 0=NUMBER, 1=FUNCTIONAL, 2=NAVIGATION, 3=TELEFON, 4=MULTIMEDIA, 5=CUSTOM
+         */
+        void usb::set_mapping(const uint8_t map)
+        {
+            if (device_handle != INVALID_HANDLE_VALUE)
+            {
+                command cmd;
+                cmd.command = varikey::COMMAND::CUSTOM;
+                cmd.identifier = varikey::IDENTIFIER::KEYPAD;
+                cmd.keypad.identifier = varikey::keypad::IDENTIFIER::MAPPING;
+                cmd.keypad.function = varikey::keypad::FUNCTION::SET;
+
+                if (map >= 0 && map <= 5)
+                    cmd.keypad.table = static_cast<varikey::keypad::TABLE>(map);
+                else
+                    cmd.keypad.table = varikey::keypad::TABLE::UNDEFINED;
+
+                if (send_report(cmd, 5) < 0)
+                {
+                    perror("send_report failed");
+                    usb_close();
+                }
+            }
+        }
+
+        /**
+         * \brief
+         *
+         * \return float
+         */
+        uint8_t usb::get_mapping()
+        {
+            feature cmd;
+            cmd.report = varikey::REPORT::MAPPING;
+            cmd.keypad.identifier = varikey::keypad::IDENTIFIER::MAPPING;
+            cmd.keypad.function = varikey::keypad::FUNCTION::GET;
+            cmd.keypad.table = varikey::keypad::TABLE::UNDEFINED;
+
+            if (device_handle != INVALID_HANDLE_VALUE)
+            {
+                if (send_report(cmd, 1 + sizeof(varikey::keypad::content_t)) < 0)
+                {
+                    cmd.keypad.table = varikey::keypad::TABLE::UNDEFINED;
+                    perror("send_report failed");
+                    usb_close();
+                }
+            }
+
+            return (int)cmd.keypad.table;
+        }
+
+        /**
+         * \brief Reset internal keypad mapping states
+         */
+        void usb::clean_mapping()
+        {
+            if (device_handle != INVALID_HANDLE_VALUE)
+            {
+                command cmd;
+                cmd.command = varikey::COMMAND::CUSTOM;
+                cmd.identifier = varikey::IDENTIFIER::KEYPAD;
+                cmd.keypad.identifier = varikey::keypad::IDENTIFIER::MAPPING;
+                cmd.keypad.function = varikey::keypad::FUNCTION::CLEAN;
+
+                if (send_report(cmd, 4) < 0)
+                {
+                    perror("send_report failed");
+                    usb_close();
+                }
+            }
         }
 
         /**

@@ -36,17 +36,30 @@ static struct argp_option options[] =
         {"vid", 'v', "VID", 0, "vendor identifier", 10},
         {"reset", 'r', 0, 0, "reset wizard device", 10},
         {"verbose", 'V', 0, 0, "more output", 10},
+
         {"clean", 'c', 0, 0, "clean up display", 20},
         {"column", 'x', "COLUMN", 0, "set the column for the next output (0-127)", 20},
         {"line", 'y', "LINE", 0, "set the line for the next output (0-3)", 20},
         {"font", 'f', "FONT", 0, "set font size (check the docs)", 20},
         {"message", 'm', "TEXT", 0, "show message string on gadget", 20},
         {"icon", 'i', "ICON", 0, "draw predefined icon (check the docs)", 30},
+
         {"backcolor", 'B', "RGB", OPTION_ARG_OPTIONAL, "set the backlight color with hex RRGGBB (use modes 3 and 6)", 40},
         {"left", '6', "COLOR", 0, "set the left backlight color with hex RRGGBB (use with -B)", 40},
         {"right", '7', "COLOR", 0, "set the right backlight color with hex RRGGBB (use with -B)", 40},
         {"backlight", 'b', "MODE", 0, "set the backlight mode (1-8,170, 171)", 40},
+
         {"temperature", 't', 0, 0, "show gadget processor temperature", 50},
+
+        {"gadget", 'G', "STATE", 0, "gadget control: 0=MOUNT, 1=UNMOUNT, 2=SUSPEND and 3=RESUME", 60},
+
+        {"keycode", 'k', "CODE", 0, "simulate key matrix code (0-23)", 70},
+        {"enable-interface", 'I', "INTERFACE", 0, "enable events over interface 0=HCI, 1=HID", 70},
+        {"disable-interface", 'D', "INTERFACE", 0, "disable events over interface 0=HCI, 1=HID", 70},
+        {"set-matting", 's', "MAP", 0, "set keypad mapping 0=NUMBER, 1=FUNCTIONAL, 2=NAVIGATION, 3=TELEFON, 4=MULTIMEDIA,  5=CUSTOM", 70},
+        {"get-mapping", 'M', 0, 0, "get current mapping", 70},
+        {"clean-mapping", 'X', 0, 0, "clean mapping states", 70},
+
         {0},
 };
 
@@ -55,9 +68,42 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
     struct wizard::arguments *arguments = (struct wizard::arguments *)state->input;
     switch (key)
     {
-    case 'b':
-        arguments->backlight = std::stoi(arg);
+    case 'l':
+        arguments->list = true;
+        arguments->devices_directory = arg;
         break;
+    case 'p':
+        arguments->pid = std::stoi(arg);
+        break;
+    case 'v':
+        arguments->vid = std::stoi(arg);
+        break;
+    case 'r':
+        arguments->reset = true;
+        break;
+    case 'V':
+        arguments->verbose = true;
+        break;
+
+    case 'c':
+        arguments->clean = true;
+        break;
+    case 'x':
+        arguments->column = std::stoi(arg);
+        break;
+    case 'y':
+        arguments->line = std::stoi(arg);
+        break;
+    case 'f':
+        arguments->font_size = std::stoi(arg);
+        break;
+    case 'm':
+        arguments->text = arg;
+        break;
+    case 'i':
+        arguments->icon = std::stoi(arg);
+        break;
+
     case 'B':
     {
         arguments->backlight = 3;
@@ -125,43 +171,62 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         }
         break;
     }
-    case 'p':
-        arguments->pid = std::stoi(arg);
+    case 'b':
+        arguments->backlight = std::stoi(arg);
         break;
-    case 'v':
-        arguments->vid = std::stoi(arg);
-        break;
-    case 'f':
-        arguments->font_size = std::stoi(arg);
-        break;
-    case 'i':
-        arguments->icon = std::stoi(arg);
-        break;
-    case 'l':
-        arguments->list = true;
-        arguments->devices_directory = arg;
-        break;
-    case 'm':
-        arguments->text = arg;
-        break;
-    case 'r':
-        arguments->reset = true;
-        break;
+
     case 't':
         arguments->temperature = true;
         break;
-    case 'V':
-        arguments->verbose = true;
+
+    case 'G':
+        arguments->gadget_state = std::stoi(arg);
         break;
-    case 'c':
-        arguments->clean = true;
+
+    case 'k':
+        arguments->key_code = std::stoi(arg);
         break;
-    case 'x':
-        arguments->column = std::stoi(arg);
+
+    case 'I':
+    {
+        uint8_t identifier = std::stoi(arg);
+        if (identifier == 0)
+        {
+            arguments->enable_hci = true;
+            arguments->enable_hci_value = true;
+        }
+        else
+        {
+            arguments->enable_hid = true;
+            arguments->enable_hid_value = true;
+        }
         break;
-    case 'y':
-        arguments->line = std::stoi(arg);
+    }
+    case 'D':
+    {
+        uint8_t identifier = std::stoi(arg);
+        if (identifier == 0)
+        {
+            arguments->enable_hci = true;
+            arguments->enable_hci_value = false;
+        }
+        else
+        {
+            arguments->enable_hid = true;
+            arguments->enable_hid_value = false;
+        }
         break;
+    }
+    case 's':
+        arguments->mapping = std::stoi(arg);
+        break;
+    case 'M':
+        arguments->mapping = 0x77;
+        break;
+    case 'X':
+        arguments->clean_mapping = true;
+        break;
+
     case ARGP_KEY_NO_ARGS:
         if (state->argc == 1)
             argp_usage(state);
@@ -189,15 +254,17 @@ extern void wizard_arguments_init(wizard::arguments &arguments)
     arguments.devices_directory = nullptr;
     arguments.pid = DEFAULT_PRODUCT_IDENTIFIER;
     arguments.vid = DEFAULT_VENDOR_IDENTIFIER;
-    arguments.verbose = false;
     arguments.list = false;
     arguments.reset = false;
-    arguments.line = 0xff;
+    arguments.verbose = false;
+
+    arguments.clean = false;
     arguments.column = 0xff;
-    arguments.icon = 0xff;
+    arguments.line = 0xff;
     arguments.font_size = 0xff;
     arguments.text = nullptr;
-    arguments.temperature = false;
+    arguments.icon = 0xff;
+
     arguments.backlight = 0xff;
     arguments.r_left_value = 0xff;
     arguments.g_left_value = 0xff;
@@ -205,6 +272,18 @@ extern void wizard_arguments_init(wizard::arguments &arguments)
     arguments.r_right_value = 0xff;
     arguments.g_right_value = 0xff;
     arguments.b_right_value = 0xff;
+
+    arguments.temperature = false;
+
+    arguments.gadget_state = 0xff;
+
+    arguments.key_code = 0xff;
+    arguments.enable_hci = false;
+    arguments.enable_hci_value = false;
+    arguments.enable_hid = false;
+    arguments.enable_hid_value = false;
+    arguments.mapping = 0xff;
+    arguments.clean_mapping = false;
 }
 
 extern void wizard_arguments_parse(wizard::arguments &arguments, int argc, char *argv[])
