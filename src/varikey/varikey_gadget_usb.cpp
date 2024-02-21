@@ -108,9 +108,9 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                command cmd;
+                set_report_t cmd;
                 cmd.command = varikey::COMMAND::CUSTOM;
-                cmd.identifier = varikey::IDENTIFIER::RESET;
+                cmd.report = varikey::SET_REPORT::RESET;
                 cmd.reset.function = varikey::reset::FUNCTION::SHUTDOWN;
 
                 if (send_report(cmd, 3) < 0)
@@ -139,9 +139,9 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                command cmd;
+                set_report_t cmd;
                 cmd.command = varikey::COMMAND::CUSTOM;
-                cmd.identifier = varikey::IDENTIFIER::BACKLIGHT;
+                cmd.report = varikey::SET_REPORT::BACKLIGHT;
                 cmd.backlight.program = static_cast<const varikey::backlight::PROGRAM>(mode);
 
                 if (cmd.backlight.program == varikey::backlight::PROGRAM::ALERT ||
@@ -179,9 +179,9 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                command cmd;
+                set_report_t cmd;
                 cmd.command = varikey::COMMAND::CUSTOM;
-                cmd.identifier = varikey::IDENTIFIER::BACKLIGHT;
+                cmd.report = varikey::SET_REPORT::BACKLIGHT;
                 cmd.backlight.program = static_cast<const varikey::backlight::PROGRAM>(mode);
 
                 if (cmd.backlight.program == varikey::backlight::PROGRAM::MORPH ||
@@ -217,9 +217,9 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                command cmd;
+                set_report_t cmd;
                 cmd.command = varikey::COMMAND::CUSTOM;
-                cmd.identifier = varikey::IDENTIFIER::DISPLAY;
+                cmd.report = varikey::SET_REPORT::DISPLAY;
                 cmd.display.identifier = varikey::display::FUNCTION::POSITION;
                 cmd.display.position.line = line;
                 cmd.display.position.column = column;
@@ -239,9 +239,9 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                command cmd;
+                set_report_t cmd;
                 cmd.command = varikey::COMMAND::CUSTOM;
-                cmd.identifier = varikey::IDENTIFIER::DISPLAY;
+                cmd.report = varikey::SET_REPORT::DISPLAY;
                 cmd.display.identifier = varikey::display::FUNCTION::CLEAN;
 
                 if (send_report(cmd, 3) < 0)
@@ -263,9 +263,9 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                command cmd;
+                set_report_t cmd;
                 cmd.command = varikey::COMMAND::CUSTOM;
-                cmd.identifier = varikey::IDENTIFIER::DISPLAY;
+                cmd.report = varikey::SET_REPORT::DISPLAY;
                 cmd.display.identifier = varikey::display::FUNCTION::ICON;
                 cmd.display.icon = static_cast<varikey::display::ICON>(icon);
 
@@ -288,9 +288,9 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                command cmd;
+                set_report_t cmd;
                 cmd.command = varikey::COMMAND::CUSTOM;
-                cmd.identifier = varikey::IDENTIFIER::DISPLAY;
+                cmd.report = varikey::SET_REPORT::DISPLAY;
                 cmd.display.identifier = varikey::display::FUNCTION::FONT;
                 cmd.display.font = static_cast<varikey::display::FONT>(font_size);
 
@@ -313,9 +313,9 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                command cmd;
+                set_report_t cmd;
                 cmd.command = varikey::COMMAND::CUSTOM;
-                cmd.identifier = varikey::IDENTIFIER::DISPLAY;
+                cmd.report = varikey::SET_REPORT::DISPLAY;
                 cmd.display.identifier = varikey::display::FUNCTION::TEXT;
                 const size_t text_size = strnlen(text, varikey::display::MAX_TEXT_SIZE);
                 memset(cmd.display.text, 0, varikey::display::MAX_TEXT_SIZE);
@@ -339,12 +339,13 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                feature cmd;
-                cmd.report = varikey::REPORT::TEMPERATURE;
+                get_report_t cmd;
+                cmd.report = varikey::GET_REPORT::TEMPERATURE;
+                cmd.result = varikey::RESULT::SUCCESS;
                 cmd.temperature.function = varikey::temperature::FUNCTION::GET;
                 cmd.temperature.value = -1;
 
-                if (send_report(cmd, 1 + sizeof(varikey::temperature::content_t)) < 0)
+                if (send_report(cmd, 1 + 2 + sizeof(varikey::temperature::content_t)) < 0)
                 {
                     perror("send_report failed");
                     usb_close();
@@ -367,9 +368,9 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                command cmd;
+                set_report_t cmd;
                 cmd.command = varikey::COMMAND::CUSTOM;
-                cmd.identifier = varikey::IDENTIFIER::GADGET;
+                cmd.report = varikey::SET_REPORT::GADGET;
 
                 switch (mode)
                 {
@@ -406,9 +407,9 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                command cmd;
+                set_report_t cmd;
                 cmd.command = varikey::COMMAND::CUSTOM;
-                cmd.identifier = varikey::IDENTIFIER::KEYPAD;
+                cmd.report = varikey::SET_REPORT::KEYPAD;
                 cmd.keypad.identifier = varikey::keypad::IDENTIFIER::KEYCODE;
                 cmd.keypad.function = varikey::keypad::FUNCTION::CLICK;
                 cmd.keypad.code = code;
@@ -431,9 +432,9 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                command cmd;
+                set_report_t cmd;
                 cmd.command = varikey::COMMAND::CUSTOM;
-                cmd.identifier = varikey::IDENTIFIER::KEYPAD;
+                cmd.report = varikey::SET_REPORT::KEYPAD;
                 if (interface == 0)
                     cmd.keypad.identifier = varikey::keypad::IDENTIFIER::HCI;
                 else if (interface == 1)
@@ -462,9 +463,9 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                command cmd;
+                set_report_t cmd;
                 cmd.command = varikey::COMMAND::CUSTOM;
-                cmd.identifier = varikey::IDENTIFIER::KEYPAD;
+                cmd.report = varikey::SET_REPORT::KEYPAD;
                 cmd.keypad.identifier = varikey::keypad::IDENTIFIER::MAPPING;
                 cmd.keypad.function = varikey::keypad::FUNCTION::SET;
 
@@ -488,15 +489,16 @@ namespace varikey
          */
         uint8_t usb::get_mapping()
         {
-            feature cmd;
-            cmd.report = varikey::REPORT::MAPPING;
+            get_report_t cmd;
+            cmd.report = varikey::GET_REPORT::MAPPING;
+            cmd.result = varikey::RESULT::SUCCESS;
             cmd.keypad.identifier = varikey::keypad::IDENTIFIER::MAPPING;
             cmd.keypad.function = varikey::keypad::FUNCTION::GET;
             cmd.keypad.table = varikey::keypad::TABLE::UNDEFINED;
 
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                if (send_report(cmd, 1 + sizeof(varikey::keypad::content_t)) < 0)
+                if (send_report(cmd, 1 + 2 + sizeof(varikey::keypad::content_t)) < 0)
                 {
                     cmd.keypad.table = varikey::keypad::TABLE::UNDEFINED;
                     perror("send_report failed");
@@ -514,13 +516,304 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                command cmd;
+                set_report_t cmd;
                 cmd.command = varikey::COMMAND::CUSTOM;
-                cmd.identifier = varikey::IDENTIFIER::KEYPAD;
+                cmd.report = varikey::SET_REPORT::KEYPAD;
                 cmd.keypad.identifier = varikey::keypad::IDENTIFIER::MAPPING;
                 cmd.keypad.function = varikey::keypad::FUNCTION::CLEAN;
 
                 if (send_report(cmd, 4) < 0)
+                {
+                    perror("send_report failed");
+                    usb_close();
+                }
+            }
+        }
+
+        void usb::set_output(const uint8_t _pin, const bool _value)
+        {
+            if (device_handle != INVALID_HANDLE_VALUE)
+            {
+                set_report_t cmd;
+                cmd.command = varikey::COMMAND::CUSTOM;
+                cmd.report = varikey::SET_REPORT::GPIO;
+                cmd.gpio.function = varikey::gpio::FUNCTION::DIRECTION_SET;
+                switch (_pin)
+                {
+                case 0:
+                    cmd.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                    break;
+                case 1:
+                    cmd.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                    break;
+                case 2:
+                    cmd.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                    break;
+                case 3:
+                    cmd.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                    break;
+
+                default:
+                    perror("wrong pin identifier");
+                    return;
+                }
+
+                if (send_report(cmd, 4) < 0)
+                {
+                    perror("send_report failed");
+                    usb_close();
+                }
+            }
+        }
+
+        const bool usb::is_output(const uint8_t _pin)
+        {
+            set_report_t request;
+            request.command = varikey::COMMAND::CUSTOM;
+            request.report = varikey::SET_REPORT::GPIO;
+            request.gpio.function = varikey::gpio::FUNCTION::DIRECTION_GET;
+            switch (_pin)
+            {
+            case 0:
+                request.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                break;
+            case 1:
+                request.gpio.identifier = varikey::gpio::IDENTIFIER::PIN2;
+                break;
+            case 2:
+                request.gpio.identifier = varikey::gpio::IDENTIFIER::PIN3;
+                break;
+            case 3:
+                request.gpio.identifier = varikey::gpio::IDENTIFIER::PIN4;
+                break;
+            default:
+                perror("wrong pin identifier");
+                return false;
+            }
+            request.gpio.direction = varikey::gpio::DIRECTION::UNDEFINED;
+
+            get_report_t response;
+            response.report = varikey::GET_REPORT::GPIO;
+            response.result = varikey::RESULT::SUCCESS;
+
+            if (device_handle != INVALID_HANDLE_VALUE)
+            {
+                if (send_report(request, 5) < 0)
+                {
+                    response.gpio.function = varikey::gpio::FUNCTION::UNDEFINED;
+                    perror("send_report failed");
+                    usb_close();
+                }
+                else if (send_report(response, 1 + 2 + 3) < 0)
+                {
+                    response.gpio.function = varikey::gpio::FUNCTION::UNDEFINED;
+                    perror("send_report failed");
+                    usb_close();
+                }
+            }
+
+            if (request.report == varikey::SET_REPORT::GPIO &&
+                request.gpio.function == response.gpio.function &&
+                request.gpio.identifier == response.gpio.identifier)
+            {
+                return response.gpio.direction == varikey::gpio::DIRECTION::OUTPUT ? true : false;
+            }
+
+            return false;
+        }
+
+        void usb::set_high(const uint8_t _pin, const bool _level)
+        {
+            if (device_handle != INVALID_HANDLE_VALUE)
+            {
+                set_report_t cmd;
+                cmd.command = varikey::COMMAND::CUSTOM;
+                cmd.report = varikey::SET_REPORT::GPIO;
+                cmd.gpio.function = varikey::gpio::FUNCTION::LEVEL_SET;
+                switch (_pin)
+                {
+                case 0:
+                    cmd.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                    break;
+                case 1:
+                    cmd.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                    break;
+                case 2:
+                    cmd.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                    break;
+                case 3:
+                    cmd.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                    break;
+
+                default:
+                    perror("wrong pin identifier");
+                    return;
+                }
+                cmd.gpio.state = _level ? varikey::gpio::LEVEL::HIGH : varikey::gpio::LEVEL::LOW;
+
+                if (send_report(cmd, 5) < 0)
+                {
+                    perror("send_report failed");
+                    usb_close();
+                }
+            }
+        }
+
+        const bool usb::is_high(const uint8_t _pin)
+        {
+            set_report_t request;
+            request.command = varikey::COMMAND::CUSTOM;
+            request.report = varikey::SET_REPORT::GPIO;
+            request.gpio.function = varikey::gpio::FUNCTION::LEVEL_GET;
+            switch (_pin)
+            {
+            case 0:
+                request.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                break;
+            case 1:
+                request.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                break;
+            case 2:
+                request.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                break;
+            case 3:
+                request.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                break;
+
+            default:
+                perror("wrong pin identifier");
+                return false;
+            }
+            request.gpio.state = varikey::gpio::LEVEL::UNDEFINED;
+
+            get_report_t response;
+            response.report = varikey::GET_REPORT::GPIO;
+            response.result = varikey::RESULT::SUCCESS;
+            response.gpio.function = varikey::gpio::FUNCTION::UNDEFINED;
+            response.gpio.identifier = varikey::gpio::IDENTIFIER::UNDEFINED;
+            response.gpio.state = varikey::gpio::LEVEL::UNDEFINED;
+
+            if (device_handle != INVALID_HANDLE_VALUE)
+            {
+                if (send_report(request, 5) < 0)
+                {
+                    request.gpio.state = varikey::gpio::LEVEL::UNDEFINED;
+                    perror("send_report failed");
+                    usb_close();
+                }
+                else if (send_report(request, 1 + 2 + 3) < 0)
+                {
+                    request.gpio.state = varikey::gpio::LEVEL::UNDEFINED;
+                    perror("send_report failed");
+                    usb_close();
+                }
+            }
+
+            if (request.report == varikey::SET_REPORT::GPIO &&
+                request.gpio.function == response.gpio.function &&
+                request.gpio.identifier == response.gpio.identifier)
+            {
+                return response.gpio.state == varikey::gpio::LEVEL::HIGH ? true : false;
+            }
+
+            return false;
+        }
+
+        void usb::set_alarm(const uint8_t _pin, const bool _alarm)
+        {
+            if (device_handle != INVALID_HANDLE_VALUE)
+            {
+                set_report_t cmd;
+                cmd.command = varikey::COMMAND::CUSTOM;
+                cmd.report = varikey::SET_REPORT::GPIO;
+                if (_alarm)
+                    cmd.gpio.function = varikey::gpio::FUNCTION::ENABLE;
+                else
+                    cmd.gpio.function = varikey::gpio::FUNCTION::DISABLE;
+                switch (_pin)
+                {
+                case 0:
+                    cmd.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                    break;
+                case 1:
+                    cmd.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                    break;
+                case 2:
+                    cmd.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                    break;
+                case 3:
+                    cmd.gpio.identifier = varikey::gpio::IDENTIFIER::PIN1;
+                    break;
+
+                default:
+                    perror("wrong pin identifier");
+                    return;
+                }
+
+                if (send_report(cmd, 4) < 0)
+                {
+                    perror("send_report failed");
+                    usb_close();
+                }
+            }
+        }
+
+        void usb::get_parameter(const uint8_t _identifier, chunk_t &_chunk)
+        {
+            if (device_handle != INVALID_HANDLE_VALUE)
+            {
+                varikey::parameter::IDENTIFIER identifier = parameter::int2id(_identifier);
+                size_t size = parameter::size(identifier);
+
+                set_report_t request;
+                request.command = varikey::COMMAND::CUSTOM;
+                request.report = varikey::SET_REPORT::PARAMETER;
+                request.parameter.function = varikey::parameter::FUNCTION::GET;
+                request.parameter.identifier = identifier;
+
+                get_report_t response;
+                response.report = varikey::GET_REPORT::PARAMETER;
+                response.result = varikey::RESULT::SUCCESS;
+                response.parameter.function = varikey::parameter::FUNCTION::GET;
+                response.parameter.identifier = identifier;
+
+                if (send_report(request, 4) < 0)
+                {
+                    perror("send_report failed");
+                    usb_close();
+                }
+                else if (send_report(response, 4 + size) < 0)
+                {
+                    perror("send_report failed");
+                    usb_close();
+                }
+
+                if (request.report == varikey::SET_REPORT::PARAMETER &&
+                    request.gpio.function == response.gpio.function &&
+                    request.gpio.identifier == response.gpio.identifier)
+                {
+                    _chunk.size = size;
+                    memcpy(_chunk.space, response.parameter.buffer, _chunk.size);
+                }
+            }
+        }
+
+        void usb::set_parameter(const uint8_t _identifier, uint8_t const *const _space)
+        {
+            if (device_handle != INVALID_HANDLE_VALUE)
+            {
+                varikey::parameter::IDENTIFIER identifier = parameter::int2id(_identifier);
+                size_t size = parameter::size(identifier);
+
+                set_report_t cmd;
+                cmd.command = varikey::COMMAND::CUSTOM;
+                cmd.report = varikey::SET_REPORT::PARAMETER;
+                cmd.parameter.function = varikey::parameter::FUNCTION::SET;
+                cmd.parameter.identifier = identifier;
+
+                memcpy(cmd.parameter.buffer, _space, size);
+
+                if (send_report(cmd, 4 + size) < 0)
                 {
                     perror("send_report failed");
                     usb_close();
@@ -535,11 +828,11 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                feature cmd;
-                cmd.report = varikey::REPORT::SERIAL;
+                get_report_t cmd;
+                cmd.report = varikey::GET_REPORT::SERIAL;
+                cmd.result = varikey::RESULT::SUCCESS;
 
-                const size_t SIZE = 1 +
-                                    sizeof(cmd.report) +
+                const size_t SIZE = 1 + 2 +
                                     varikey::SERIAL_NUMBER_SIZE;
 
                 if (send_report(cmd, SIZE) < 0)
@@ -564,10 +857,10 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                feature cmd;
-                cmd.report = varikey::REPORT::UNIQUE;
-                const size_t SIZE = 1 +
-                                    sizeof(cmd.report) +
+                get_report_t cmd;
+                cmd.report = varikey::GET_REPORT::UNIQUE;
+                cmd.result = varikey::RESULT::SUCCESS;
+                const size_t SIZE = 1 + 2 +
                                     sizeof(cmd.identity.unique);
 
                 if (send_report(cmd, SIZE) < 0)
@@ -592,10 +885,10 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                feature cmd;
-                cmd.report = varikey::REPORT::HARDWARE;
-                const size_t SIZE = 1 +
-                                    sizeof(cmd.report) +
+                get_report_t cmd;
+                cmd.report = varikey::GET_REPORT::HARDWARE;
+                cmd.result = varikey::RESULT::SUCCESS;
+                const size_t SIZE = 1 + 2 +
                                     sizeof(cmd.identity.hardware);
 
                 if (send_report(cmd, SIZE) < 0)
@@ -623,10 +916,10 @@ namespace varikey
         {
             if (device_handle != INVALID_HANDLE_VALUE)
             {
-                feature cmd;
-                cmd.report = varikey::REPORT::FIRMWARE;
-                const size_t SIZE = 1 +
-                                    sizeof(varikey::identity::IDENTIFIER) +
+                get_report_t cmd;
+                cmd.report = varikey::GET_REPORT::FIRMWARE;
+                cmd.result = varikey::RESULT::SUCCESS;
+                const size_t SIZE = 1 + 2 +
                                     sizeof(varikey::identity::content_t::firmware);
 
                 if (send_report(cmd, SIZE) < 0)
@@ -653,7 +946,7 @@ namespace varikey
          * @param cmd
          * @return int
          */
-        int usb::send_report(command &cmd, const size_t cmd_size)
+        int usb::send_report(set_report_t &cmd, const size_t cmd_size)
         {
             assert(cmd_size <= sizeof(cmd));
 
@@ -675,7 +968,7 @@ namespace varikey
          * @param cmd
          * @return int
          */
-        int usb::send_report(feature &cmd, const size_t cmd_size)
+        int usb::send_report(get_report_t &cmd, const size_t cmd_size)
         {
             assert(cmd_size <= sizeof(cmd));
             int result = -1;

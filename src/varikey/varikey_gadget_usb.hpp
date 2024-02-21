@@ -64,14 +64,23 @@ namespace varikey
             uint8_t get_mapping();
             void clean_mapping();
 
+            void set_output(const uint8_t, const bool);
+            const bool is_output(const uint8_t);
+            void set_high(const uint8_t, const bool);
+            const bool is_high(const uint8_t);
+            void set_alarm(const uint8_t, const bool);
+
+            void get_parameter(const uint8_t, chunk_t &);
+            void set_parameter(const uint8_t, uint8_t const *const);
+
         private:
             bool usb_get_serial();
             bool usb_get_unique();
             bool usb_get_hardware();
             bool usb_get_firmware();
 
-            int send_report(command &cmd, const size_t);
-            int send_report(feature &cmd, const size_t);
+            int send_report(set_report_t &cmd, const size_t);
+            int send_report(get_report_t &cmd, const size_t);
 
             varikey::device device;
 

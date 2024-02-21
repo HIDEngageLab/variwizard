@@ -31,13 +31,14 @@ string(TOLOWER ${LIBRARY_NAME} LIBRARY_NAME)
 include("${CMAKE_SOURCE_DIR}/build/graffiti.cmake")
 
 add_library(${LIBRARY_NAME}
-    src/varikey/varikey_gadget_usb.cpp
     src/pulp/macros.cpp
+    src/varikey/varikey_command.cpp
+    src/varikey/varikey_gadget_usb.cpp
 )
 
 add_executable(${EXECUTABLE_NAME}
-    src/wizard/wizard.cpp
     src/wizard/wizard_args.cpp
+    src/wizard/wizard.cpp
 )
 
 add_executable(report-example 

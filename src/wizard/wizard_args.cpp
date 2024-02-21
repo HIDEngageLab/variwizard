@@ -60,6 +60,18 @@ static struct argp_option options[] =
         {"get-mapping", 'M', 0, 0, "get current mapping", 70},
         {"clean-mapping", 'X', 0, 0, "clean mapping states", 70},
 
+        {"set-input", '2', "PIN", 0, "set pin 0-3 to input", 80},
+        {"set-output", '3', "PIN", 0, "set pin 0-3 to output", 80},
+        {"direction", '4', "PIN", 0, "get pin 0-3 direction", 80},
+        {"set-high", 'H', "PIN", 0, "set output pin 0-3 high", 80},
+        {"set-low", 'L', "PIN", 0, "set output pin 0-3 low", 80},
+        {"get-level", 'Y', "PIN", 0, "get pin 0-3 level", 80},
+        {"enable-pin", 'A', "PIN", 0, "enable alarm on pin 0-3", 80},
+        {"disable-pin", 'a', "PIN", 0, "disable alarm on pin 0-3", 80},
+
+        {"get-parameter", 'U', "PARAMETER", 0, "get parameter: 161=BACKLIGHT, 163=DISPLAY, 81=FEATURES, 162=KEYPAD, 35=MAINTAINER, 176=MAPPING, 36=POSITION, 17=SERIAL_NUMBER, 112=USER", 90},
+        {"set-parameter", 'u', "PARAMETER", 0, "set parameter", 90},
+
         {0},
 };
 
@@ -227,6 +239,48 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         arguments->clean_mapping = true;
         break;
 
+    case '2':
+        arguments->pin = std::stoi(arg) % 4;
+        arguments->direction = wizard::DIRECTION::DIRECTION_IN;
+        break;
+    case '3':
+        arguments->pin = std::stoi(arg) % 4;
+        arguments->direction = wizard::DIRECTION::DIRECTION_OUT;
+        break;
+    case '4':
+        arguments->pin = std::stoi(arg) % 4;
+        arguments->get_direction = true;
+        break;
+    case 'H':
+        arguments->pin = std::stoi(arg) % 4;
+        arguments->level = wizard::LEVEL::LEVEL_HIGH;
+        break;
+    case 'L':
+        arguments->pin = std::stoi(arg) % 4;
+        arguments->level = wizard::LEVEL::LEVEL_LOW;
+        break;
+    case 'Y':
+        arguments->pin = std::stoi(arg) % 4;
+        arguments->get_level = true;
+        break;
+    case 'A':
+        arguments->pin = std::stoi(arg) % 4;
+        arguments->alarm = wizard::ALARM::ALARM_ENABLE;
+        break;
+    case 'a':
+        arguments->pin = std::stoi(arg) % 4;
+        arguments->alarm = wizard::ALARM::ALARM_DISABLE;
+        break;
+
+    case 'U':
+        arguments->parameter = std::stoi(arg);
+        arguments->parameter_function = wizard::FUNCTION::FUNCTION_GET;
+        break;
+    case 'u':
+        arguments->parameter = std::stoi(arg);
+        arguments->parameter_function = wizard::FUNCTION::FUNCTION_SET;
+        break;
+
     case ARGP_KEY_NO_ARGS:
         if (state->argc == 1)
             argp_usage(state);
@@ -284,6 +338,16 @@ extern void wizard_arguments_init(wizard::arguments &arguments)
     arguments.enable_hid_value = false;
     arguments.mapping = 0xff;
     arguments.clean_mapping = false;
+
+    arguments.pin = 0xff;
+    arguments.direction = wizard::DIRECTION_UNDEFINED;
+    arguments.get_direction = false;
+    arguments.level = wizard::LEVEL_UNDEFINED;
+    arguments.get_level = false;
+    arguments.alarm = wizard::ALARM_UNDEFINED;
+
+    arguments.parameter = 0xff;
+    arguments.parameter_function = wizard::FUNCTION::FUNCTION_UNDEFINED;
 }
 
 extern void wizard_arguments_parse(wizard::arguments &arguments, int argc, char *argv[])

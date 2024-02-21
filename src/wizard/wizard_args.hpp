@@ -13,6 +13,34 @@
 
 namespace wizard
 {
+    enum FUNCTION
+    {
+        FUNCTION_SET,
+        FUNCTION_GET,
+        FUNCTION_UNDEFINED,
+    };
+
+    enum DIRECTION
+    {
+        DIRECTION_IN,
+        DIRECTION_OUT,
+        DIRECTION_UNDEFINED,
+    };
+
+    enum LEVEL
+    {
+        LEVEL_HIGH,
+        LEVEL_LOW,
+        LEVEL_UNDEFINED,
+    };
+
+    enum ALARM
+    {
+        ALARM_ENABLE,
+        ALARM_DISABLE,
+        ALARM_UNDEFINED,
+    };
+
     struct arguments
     {
         uint16_t pid; /* usb pid */
@@ -51,6 +79,17 @@ namespace wizard
         bool enable_hid_value; /* enable hid */
         uint8_t mapping;       /* key matrix mapping */
         bool clean_mapping;    /* clean internal mapping states */
+
+        uint8_t pin;         /* pin number */
+        DIRECTION direction; /* output/input */
+        bool get_direction;  /* ger direction report */
+        LEVEL level;         /* pin level */
+        bool get_level;      /* get pin level */
+        ALARM alarm;         /* enable/disable pin level alarm */
+
+        uint8_t parameter;            /* parameter identifier, 0xff undefined*/
+        FUNCTION parameter_function;  /* parameter function, 0xff undefined*/
+        uint8_t parameter_value[128]; /* parameter chunk */
     };
 }
 

@@ -15,28 +15,37 @@
 
 bool VERBOSE_OUTPUT = true;
 
-static void reset_device(wizard::usb &, const uint32_t unique);
+static void reset_device(wizard::usb &, const uint32_t);
 
-static void clean_display(wizard::usb &, const uint32_t unique);
-static void set_position(wizard::usb &, const uint32_t unique, const uint8_t line, const uint8_t column);
-static void set_font_size(wizard::usb &, const uint32_t unique, const uint8_t font_size);
-static void print_text(wizard::usb &, const uint32_t unique, const std::string &text);
-static void draw_icon(wizard::usb &, const uint32_t unique, const uint8_t icon);
+static void clean_display(wizard::usb &, const uint32_t);
+static void set_position(wizard::usb &, const uint32_t, const uint8_t line, const uint8_t column);
+static void set_font_size(wizard::usb &, const uint32_t, const uint8_t font_size);
+static void print_text(wizard::usb &, const uint32_t, const std::string &text);
+static void draw_icon(wizard::usb &, const uint32_t, const uint8_t icon);
 
-static void get_temperature(wizard::usb &, const uint32_t unique);
+static void get_temperature(wizard::usb &, const uint32_t);
 
-static void set_backlight(wizard::usb &, const uint32_t unique, const uint8_t mode);
-static void set_backlight_color(wizard::usb &, const uint32_t unique, const uint8_t mode,
+static void set_backlight(wizard::usb &, const uint32_t, const uint8_t mode);
+static void set_backlight_color(wizard::usb &, const uint32_t, const uint8_t mode,
 								const uint8_t lr, const uint8_t lg, const uint8_t lb,
 								const uint8_t rr, const uint8_t rg, const uint8_t rb);
 
-static void set_gadget_status(wizard::usb &, const uint32_t unique, const uint8_t);
+static void set_gadget_status(wizard::usb &, const uint32_t, const uint8_t);
 
-static void send_keycode(wizard::usb &, const uint32_t unique, const uint8_t);
-static void enable_interface(wizard::usb &, const uint32_t unique, const uint8_t, const bool);
-static void set_mapping(wizard::usb &, const uint32_t unique, const uint8_t);
-static void get_mapping(wizard::usb &, const uint32_t unique);
-static void clean_mapping(wizard::usb &, const uint32_t unique);
+static void send_keycode(wizard::usb &, const uint32_t, const uint8_t);
+static void enable_interface(wizard::usb &, const uint32_t, const uint8_t, const bool);
+static void set_mapping(wizard::usb &, const uint32_t, const uint8_t);
+static void get_mapping(wizard::usb &, const uint32_t);
+static void clean_mapping(wizard::usb &, const uint32_t);
+
+static void set_pin_direction(wizard::usb &, const uint32_t, const uint8_t, const wizard::DIRECTION);
+static void get_pin_direction(wizard::usb &, const uint32_t, const uint8_t);
+static void set_pin_level(wizard::usb &, const uint32_t, const uint8_t, const wizard::LEVEL);
+static void get_pin_level(wizard::usb &, const uint32_t, const uint8_t);
+static void set_pin_alarm(wizard::usb &, const uint32_t, const uint8_t, wizard::ALARM);
+
+static void get_parameter(wizard::usb &, const uint32_t, const uint8_t);
+static void set_parameter(wizard::usb &, const uint32_t, const uint8_t, uint8_t const *const);
 
 int main(int argc, char *argv[])
 {
@@ -169,6 +178,42 @@ int main(int argc, char *argv[])
 		else if (arguments.mapping == 0x77)
 		{
 			get_mapping(wizard_usb_object, serial_number);
+		}
+
+		if (arguments.direction == wizard::DIRECTION::DIRECTION_IN ||
+			arguments.direction == wizard::DIRECTION::DIRECTION_OUT)
+		{
+			set_pin_direction(wizard_usb_object, serial_number, arguments.pin, arguments.direction);
+		}
+		if (arguments.level == wizard::LEVEL::LEVEL_HIGH ||
+			arguments.level == wizard::LEVEL::LEVEL_LOW)
+		{
+			set_pin_level(wizard_usb_object, serial_number, arguments.pin, arguments.level);
+		}
+		if (arguments.alarm == wizard::ALARM::ALARM_ENABLE ||
+			arguments.alarm == wizard::ALARM::ALARM_DISABLE)
+		{
+			set_pin_alarm(wizard_usb_object, serial_number, arguments.pin, arguments.alarm);
+		}
+		if (arguments.get_direction)
+		{
+			get_pin_direction(wizard_usb_object, serial_number, arguments.pin);
+		}
+		if (arguments.get_level)
+		{
+			get_pin_level(wizard_usb_object, serial_number, arguments.pin);
+		}
+
+		if (arguments.parameter != 0xff)
+		{
+			if (arguments.parameter_function == wizard::FUNCTION::FUNCTION_GET)
+			{
+				get_parameter(wizard_usb_object, serial_number, arguments.parameter);
+			}
+			else if (arguments.parameter_function == wizard::FUNCTION::FUNCTION_SET)
+			{
+				set_parameter(wizard_usb_object, serial_number, arguments.parameter, arguments.parameter_value);
+			}
 		}
 	}
 
@@ -393,6 +438,126 @@ static void clean_mapping(wizard::usb &wizard_usb_object, const uint32_t unique)
 	if (gadget.is_valid() && gadget.is_open())
 	{
 		gadget.clean_mapping();
+		wizard_usb_object.close_device(gadget);
+	}
+	else
+	{
+		std::cout << "invalid device" << std::endl;
+	}
+}
+
+static void set_pin_direction(wizard::usb &wizard_usb_object, const uint32_t unique,
+							  const uint8_t pin, const wizard::DIRECTION direction)
+{
+	varikey::gadget::usb &gadget = wizard_usb_object.open_device(unique);
+	if (gadget.is_valid() && gadget.is_open())
+	{
+		gadget.set_output(pin, direction == wizard::DIRECTION::DIRECTION_OUT ? true : false);
+		wizard_usb_object.close_device(gadget);
+	}
+	else
+	{
+		std::cout << "invalid device" << std::endl;
+	}
+}
+
+static void get_pin_direction(wizard::usb &wizard_usb_object, const uint32_t unique,
+							  const uint8_t pin)
+{
+	varikey::gadget::usb &gadget = wizard_usb_object.open_device(unique);
+	if (gadget.is_valid() && gadget.is_open())
+	{
+		bool value = gadget.is_output(pin);
+		std::cout << "device " << unique << " pin  " << (int)pin << " is configured as " << (value ? "output" : "input") << std::endl;
+
+		wizard_usb_object.close_device(gadget);
+	}
+	else
+	{
+		std::cout << "invalid device" << std::endl;
+	}
+}
+
+static void set_pin_level(wizard::usb &wizard_usb_object, const uint32_t unique,
+						  const uint8_t pin, const wizard::LEVEL level)
+{
+	varikey::gadget::usb &gadget = wizard_usb_object.open_device(unique);
+	if (gadget.is_valid() && gadget.is_open())
+	{
+		gadget.set_high(pin, level == wizard::LEVEL::LEVEL_HIGH ? true : false);
+
+		wizard_usb_object.close_device(gadget);
+	}
+	else
+	{
+		std::cout << "invalid device" << std::endl;
+	}
+}
+
+static void get_pin_level(wizard::usb &wizard_usb_object, const uint32_t unique,
+						  const uint8_t pin)
+{
+	varikey::gadget::usb &gadget = wizard_usb_object.open_device(unique);
+	if (gadget.is_valid() && gadget.is_open())
+	{
+		bool value = gadget.is_high(pin);
+		std::cout << "device " << unique << " pin  " << pin << " level is " << (value ? "high" : "low") << std::endl;
+
+		wizard_usb_object.close_device(gadget);
+	}
+	else
+	{
+		std::cout << "invalid device" << std::endl;
+	}
+}
+
+static void set_pin_alarm(wizard::usb &wizard_usb_object, const uint32_t unique,
+						  const uint8_t pin, wizard::ALARM alarm)
+{
+	varikey::gadget::usb &gadget = wizard_usb_object.open_device(unique);
+	if (gadget.is_valid() && gadget.is_open())
+	{
+		gadget.set_alarm(pin, alarm == wizard::ALARM::ALARM_ENABLE ? true : false);
+
+		wizard_usb_object.close_device(gadget);
+	}
+	else
+	{
+		std::cout << "invalid device" << std::endl;
+	}
+}
+
+static void get_parameter(wizard::usb &wizard_usb_object, const uint32_t unique,
+						  const uint8_t _parameter)
+{
+	varikey::gadget::usb &gadget = wizard_usb_object.open_device(unique);
+	if (gadget.is_valid() && gadget.is_open())
+	{
+		chunk_t chunk;
+		gadget.get_parameter(_parameter, chunk);
+		std::cout << "parameter " << (int)_parameter << " ";
+		for (size_t i = 0; i < chunk.size; ++i)
+		{
+			std::cout << (int)chunk.space[i] << " ";
+		}
+		std::cout << std::endl;
+
+		wizard_usb_object.close_device(gadget);
+	}
+	else
+	{
+		std::cout << "invalid device" << std::endl;
+	}
+}
+
+static void set_parameter(wizard::usb &wizard_usb_object, const uint32_t unique,
+						  const uint8_t _parameter, uint8_t const *const _space)
+{
+	varikey::gadget::usb &gadget = wizard_usb_object.open_device(unique);
+	if (gadget.is_valid() && gadget.is_open())
+	{
+		gadget.set_parameter(_parameter, _space);
+
 		wizard_usb_object.close_device(gadget);
 	}
 	else

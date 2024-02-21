@@ -12,6 +12,7 @@
 #include <cstdint>
 
 #include "chunk.h"
+#include "macros.hpp"
 #include "varikey_device.hpp"
 
 namespace varikey
@@ -237,8 +238,11 @@ namespace varikey
         {
             FUNCTION function;
             IDENTIFIER identifier;
-            DIRECTION direction;
-            LEVEL state;
+            union
+            {
+                DIRECTION direction;
+                LEVEL state;
+            };
         };
     }
 
@@ -391,6 +395,18 @@ namespace varikey
             UNDEFINED = (int)varikey::function::UNDEFINED,
         };
 
+        enum MODIFIER
+        {
+            KEY_MOD_LCTRL = 0x01,
+            KEY_MOD_LSHIFT = 0x02,
+            KEY_MOD_LALT = 0x04,
+            KEY_MOD_LMETA = 0x08,
+            KEY_MOD_RCTRL = 0x10,
+            KEY_MOD_RSHIFT = 0x20,
+            KEY_MOD_RALT = 0x40,
+            KEY_MOD_RMETA = 0x80,
+        };
+
         struct __attribute__((packed)) content_t
         {
             IDENTIFIER identifier;
@@ -405,6 +421,102 @@ namespace varikey
 
     namespace parameter
     {
+        static const size_t SIZE_BACKLIGHT = sizeof(varikey::backlight::PROGRAM) +
+                                             sizeof(varikey::backlight::color_t) +
+                                             sizeof(varikey::backlight::color_t) +
+                                             sizeof(uint16_t);
+        static const size_t SIZE_DISPLAY = sizeof(uint8_t) * 1;
+        static const size_t SIZE_FEATURES = sizeof(uint16_t);
+        static const size_t SIZE_KEYPAD = sizeof(uint16_t) * 2;
+        static const size_t SIZE_MAINTAINER = sizeof(uint16_t) * 1;
+        static const size_t SIZE_MAPPING = 24;
+        static const size_t SIZE_POSITION = sizeof(float) * 2;
+        static const size_t SIZE_SERIAL_NUMBER = 12;
+        static const size_t SIZE_USER = 2;
+
+        union backlight_t
+        {
+            uint8_t byte[SIZE_BACKLIGHT];
+            struct __attribute__((packed))
+            {
+                varikey::backlight::PROGRAM mode;
+                varikey::backlight::color_t left;
+                varikey::backlight::color_t right;
+                uint16_t timeout;
+            } backlight;
+        };
+
+        union display_t
+        {
+            uint8_t byte[SIZE_DISPLAY];
+            struct __attribute__((packed))
+            {
+                ability_t rotate : 1;
+                ability_t inverse : 1;
+                ability_t slides : 1;
+                uint8_t reserved : 5;
+            } display;
+        };
+
+        union features_t
+        {
+            uint8_t byte[SIZE_FEATURES];
+            struct __attribute__((packed))
+            {
+                ability_t autostart : 1;
+                ability_t display : 1;
+                ability_t keypad : 1;
+                ability_t wakeup : 1;
+                uint16_t reserved : 12;
+            } features;
+        };
+
+        union keypad_t
+        {
+            uint8_t byte[SIZE_KEYPAD];
+            struct __attribute__((packed))
+            {
+                uint16_t click_ms;
+                uint16_t push_ms;
+            } keypad;
+        };
+
+        union maintainer_t
+        {
+            uint16_t word;
+            struct __attribute__((packed))
+            {
+                uint16_t protocol : 2;
+                uint16_t hardware : 4;
+                uint16_t identifier : 12;
+            } maintainer;
+        };
+
+        struct mapping_t
+        {
+            uint8_t value[SIZE_MAPPING];
+        };
+
+        union position_t
+        {
+            uint8_t byte[SIZE_POSITION];
+            struct __attribute__((packed))
+            {
+                float latitude;
+                float longitude;
+            } coordinates;
+        };
+
+        struct serial_number_t
+        {
+            uint8_t value[SIZE_SERIAL_NUMBER];
+        };
+
+        struct user_t
+        {
+            uint8_t value[SIZE_USER];
+        };
+
         enum class IDENTIFIER : uint8_t
         {
             BACKLIGHT = 0xA1,
@@ -420,6 +532,10 @@ namespace varikey
             UNDEFINED = 0xff,
         };
 
+        extern const int id2int(const IDENTIFIER);
+        extern const IDENTIFIER int2id(const int);
+        extern const int size(const IDENTIFIER);
+
         enum class FUNCTION : uint8_t
         {
             SET = 0x01,
@@ -432,7 +548,19 @@ namespace varikey
         {
             IDENTIFIER identifier;
             FUNCTION function;
-            chunk_t value;
+            union
+            {
+                uint buffer[100];
+                backlight_t backlight;
+                display_t display;
+                features_t features;
+                keypad_t keypad;
+                maintainer_t maintainer;
+                mapping_t mapping;
+                position_t position;
+                serial_number_t serial_number;
+                user_t user;
+            };
         };
     }
 
@@ -469,16 +597,29 @@ namespace varikey
         };
     }
 
-    struct __attribute__((__packed__)) command
+    enum class SET_REPORT : uint8_t
+    {
+        BACKLIGHT = (int)IDENTIFIER::BACKLIGHT,
+        DISPLAY = (int)IDENTIFIER::DISPLAY,
+        GADGET = (int)IDENTIFIER::GADGET,
+        GPIO = (int)IDENTIFIER::GPIO,
+        KEYPAD = (int)IDENTIFIER::KEYPAD,
+        PARAMETER = (int)IDENTIFIER::PARAMETER,
+        RESET = (int)IDENTIFIER::RESET,
+
+        UNDEFINED = 0xff,
+    };
+
+    struct __attribute__((__packed__)) set_report_t
     {
         COMMAND command;
-        IDENTIFIER identifier;
+        SET_REPORT report;
         union __attribute__((__packed__))
         {
             backlight::content_t backlight;
             display::content_t display;
             gadget::content_t gadget;
-            gpio::content_t debug;
+            gpio::content_t gpio;
             identity::content_t identity;
             keycode::content_t keycode;
             keypad::content_t keypad;
@@ -488,11 +629,13 @@ namespace varikey
         };
     };
 
-    enum class REPORT : uint8_t
+    enum class GET_REPORT : uint8_t
     {
         FIRMWARE = (int)varikey::identity::IDENTIFIER::FIRMWARE,
+        GPIO = (int)varikey::IDENTIFIER::GPIO,
         HARDWARE = (int)varikey::identity::IDENTIFIER::HARDWARE,
         MAPPING = (int)varikey::keypad::IDENTIFIER::MAPPING,
+        PARAMETER = (int)varikey::IDENTIFIER::PARAMETER,
         SERIAL = (int)varikey::identity::IDENTIFIER::SERIAL,
         TEMPERATURE = (int)varikey::IDENTIFIER::TEMPERATURE,
         UNIQUE = (int)varikey::identity::IDENTIFIER::UNIQUE,
@@ -500,14 +643,29 @@ namespace varikey
         UNDEFINED = 0xff,
     };
 
-    struct __attribute__((__packed__)) feature
+    enum class RESULT : uint8_t
     {
-        REPORT report;
+        CUSTOM = common::result::CUSTOM,
+        ERROR = common::result::ERROR,
+        FAILURE = common::result::FAILURE,
+        SUCCESS = common::result::SUCCESS,
+        UNKNOWN = common::result::UNKNOWN,
+        UNSUPPORTED = common::result::UNSUPPORTED,
+
+        UNDEFINED = (int)common::result::UNDEFINED,
+    };
+
+    struct __attribute__((__packed__)) get_report_t
+    {
+        GET_REPORT report;
+        RESULT result;
         union
         {
+            gpio::content_t gpio;
             identity::content_t identity;
-            temperature::content_t temperature;
             keypad::content_t keypad;
+            parameter::content_t parameter;
+            temperature::content_t temperature;
         };
     };
 }
