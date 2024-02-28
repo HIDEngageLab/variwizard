@@ -550,7 +550,7 @@ namespace varikey
             FUNCTION function;
             union
             {
-                uint buffer[100];
+                uint8_t buffer[100];
                 backlight_t backlight;
                 display_t display;
                 features_t features;

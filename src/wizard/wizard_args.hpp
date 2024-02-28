@@ -87,9 +87,9 @@ namespace wizard
         bool get_level;      /* get pin level */
         ALARM alarm;         /* enable/disable pin level alarm */
 
-        uint8_t parameter;            /* parameter identifier, 0xff undefined*/
-        FUNCTION parameter_function;  /* parameter function, 0xff undefined*/
-        uint8_t parameter_value[128]; /* parameter chunk */
+        uint8_t parameter;           /* parameter identifier, 0xff undefined*/
+        FUNCTION parameter_function; /* parameter function, 0xff undefined*/
+        char **strings;         /* arguments */
     };
 }
 

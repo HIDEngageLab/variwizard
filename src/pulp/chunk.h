@@ -26,4 +26,8 @@ typedef struct chunk_struct
 	size_t size;
 } chunk_t;
 
+#define CHUNK(NAME, SIZE)           \
+	uint8_t chunk_space_NAME[SIZE]; \
+	chunk_t NAME = {.space = chunk_space_NAME, .size = SIZE};
+
 #endif /* __PULP_CHUNK_HPP__ */

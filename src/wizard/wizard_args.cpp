@@ -7,6 +7,7 @@
  */
 
 #include <argp.h>
+#include <cstdio>
 #include <cstdlib>
 #include <iostream>
 
@@ -286,6 +287,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
             argp_usage(state);
         break;
     case ARGP_KEY_ARG:
+        arguments->strings[state->arg_num] = arg;
         break;
     case ARGP_KEY_END:
         break;
